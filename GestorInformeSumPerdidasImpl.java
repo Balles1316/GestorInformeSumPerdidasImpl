@@ -308,32 +308,18 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 
 		creacionTabla("Totalizadores","NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar");
 
-		// Punto de Suministro
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("Punto de Suministro")
-				.append(CLOSE_TH);
+		Map<String, String> columnas = new LinkedHashMap<>();
 
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("TL_S")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("TL_S_Procesar")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLEAmarillo)
-				.append("SUM TL_S")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("TOT Ini")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("TOT Fin")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLEAmarillo)
-				.append("Dif TOT")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLEAmarillo)
-				.append("Dif TOT vs SUM")
-				.append(CLOSE_TH);
+		columnas.put("Punto de Suministro", OPEN_TH_STYLE);
+		columnas.put("TL_S", OPEN_TH_STYLE);
+		columnas.put("TL_S_Procesar", OPEN_TH_STYLE);
+		columnas.put("SUM TL_S", OPEN_TH_STYLEAmarillo);
+		columnas.put("TOT Ini", OPEN_TH_STYLE);
+		columnas.put("Dif TOT", OPEN_TH_STYLEAmarillo);
+		columnas.put("Dif TOT vs SUM", OPEN_TH_STYLEAmarillo);
+
+		crearCabeceras(resultStringBuilder, columnas);
+
 	}
 
 	private void cabeceraTablaDos(StringBuilder resultStringBuilder){
@@ -341,9 +327,13 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		//TODO: CAMBIAR FORMULA
 		creacionTabla("Litros movidos AYER","TODO: CAMBIAR FORMULA");
 
+		Map<String,String> columnas = new LinkedHashMap<>();
+
+		columnas.put(Punto de Suministro,OPEN_TH_STYLE);
+
 		// Punto de Suministro
 		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("Punto de Suministro")
+				.append("")
 				.append(CLOSE_TH);
 
 		resultStringBuilder.append(OPEN_TH_STYLE)
@@ -417,6 +407,8 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		//TODO: CAMBIAR FORMULA
 		creacionTabla("Otros","TODO: CAMBIAR FORMULA");
 
+		crearCabeceras(resultStringBuilder,);
+
 		// Punto de Suministro
 		resultStringBuilder.append(OPEN_TH_STYLE)
 				.append("Punto de Suministro")
@@ -451,6 +443,16 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 				.append(CLOSE_TH);
 
 	}
+
+	private void crearCabeceras(StringBuilder sb,
+                            Map<String, String> columnas) {
+
+    for (Map.Entry<String, String> columna : columnas.entrySet()) {
+        sb.append(columna.getValue())
+          .append(columna.getKey())
+          .append(CLOSE_TH);
+    }
+}
 
 	private void cuerpo(StringBuilder resultStringBuilder) {
 		cuerpo(resultStringBuilder, null);
