@@ -33,74 +33,74 @@ import es.adif.tlg.utils.GestorCorreo;
 
 @Component
 public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(GestorInformeSumPerdidasImpl.class);
-	
+
 	protected static final String ERROR = "ERROR, no coincide con el total final";
 	protected static final String OK = "OK";
-	
+
 	private static final String GUION = "-";
 	private static final String PUNTOS_SEGUIDOS = " : ";
-	private static final String OPEN_HTML_BODY ="<html><body>";
-	private static final String	CLOSE_HTML_BODY = "</body></html>";
+	private static final String OPEN_HTML_BODY = "<html><body>";
+	private static final String CLOSE_HTML_BODY = "</body></html>";
 	private static final String OPEN_LI = "<li>";
-	private static final String OPEN_LI_STYLE =	"<li style=\"list-style-type: none;\">";
-	private static final String	CLOSE_LI = "</li>";
+	private static final String OPEN_LI_STYLE = "<li style=\"list-style-type: none;\">";
+	private static final String CLOSE_LI = "</li>";
 	private static final String OPEN_UL = "<ul>";
-	private static final String	CLOSE_UL = "</ul>";
+	private static final String CLOSE_UL = "</ul>";
 	private static final String OPEN_TH_STYLE = "<th style=\"border: 1px solid black ;background-color: #f2f2f2;\">";
 	private static final String OPEN_TH_STYLEYellow = "<th style=\"border: 1px solid black ;background-color: #FFEE8C;\">";
-	private static final String OPEN_TH_STYLEOrange = "<th style=\"border: 1px solid black ;background-color: #ffe5b4;\">";
+	private static final String OPEN_TH_STYLEOrange = "<th style=\"border: 1px solid black ;background-color: #ff7b00;\">";
 	private static final String CLOSE_TH = "</th>";
-	private static final String OPEN_TR = "<tr>";			
+	private static final String OPEN_TR = "<tr>";
 	private static final String CLOSE_TR = "</tr>";
 	private static final String OPEN_TD = "<td style=\"border: 1px solid black ;\">";
 	private static final String OPEN_TD_STYLE = "<td style=\"border: 1px solid black ; text-align: right;\">";
 	private static final String CLOSE_TD = "</td>";
-	private static final String ETIQUETA_BR ="<br/>";
+	private static final String ETIQUETA_BR = "<br/>";
 	private static final String OPEN_TABLE = "<table style=\"border: 1px solid black;\">";
 	private static final String CLOSE_TABLE = "</table>";
 	private static final String COLOR = "_color";
-	private static final String COLOR_Red     = "#f8d7da";
+	private static final String COLOR_Red = "#f8d7da";
 	@Autowired
 	private IGestorPersonal personalGestor;
-	
+
 	@Autowired
 	private GestorCorreo gestorCorreo;
-	
-    @Autowired
-    private ISuministroDAO suministroDAO;
-    
-    @Autowired
+
+	@Autowired
+	private ISuministroDAO suministroDAO;
+
+	@Autowired
 	private IGestorPuntoSuministro iGestorPuntoSuministro;
 
-    @Autowired
+	@Autowired
 	private IGestorSuministro iGestorSuministro;
-    
-    @Autowired
+
+	@Autowired
 	private IGestorDescarga iGestorDescarga;
 
 	@Autowired
 	private IExistenciasTeoricasDAO iExistenciasTeoricasDAO;
-    
-    @Autowired
+
+	@Autowired
 	private IDescargaTanqueDAO iDescargaTanqueDAO;
 
 	@Autowired
 	private ISuministroDAO iSuministroDAO;
-    
+
 	@Autowired
 	private IGestorSurtidor iGestorSurtidor;
-	
+
 	@Autowired
 	private ITanqueDAO iTanqueDAO;
-	
+
 	@Autowired
 	private IGestorSuministroNodoCabezal iGestorSuministroNodoCabezal;
-	
+
 	@Autowired
 	private IGestorDescargaNodoConsola iGestorDescargaNodoConsola;
-	
+
 	@Autowired
 	private IGestorNivelTanque iGestorNivelTanque;
 
@@ -108,29 +108,28 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	private IErrorNumeracionSuministroDAO iErrorNumeracionSuministroDAO;
 
 	/* ======================================================================= */
-	/* CREATE 	                                                               */
+	/* CREATE */
 	/* ======================================================================= */
 
 	/* ======================================================================= */
-	/* READ 	                                                               */
+	/* READ */
 	/* ======================================================================= */
 
 	/* ======================================================================= */
-	/* UPDATE 	                                                               */
+	/* UPDATE */
 	/* ======================================================================= */
 
 	/* ======================================================================= */
-	/* DELETE 	                                                               */
+	/* DELETE */
 	/* ======================================================================= */
 
 	/* ======================================================================= */
-	/* LOGICA 	                                                               */
+	/* LOGICA */
 	/* ======================================================================= */
-	
 
 	/**
-	* Genera y envía el informe diario de comprobaciones y posibles pérdidas.
-	*/
+	 * Genera y envía el informe diario de comprobaciones y posibles pérdidas.
+	 */
 	@Override
 	public void crearInformeSumPerdidos() throws Exception {
 		LOGGER.info("[crearInformeSumPerdidos] INICIO ");
@@ -138,13 +137,13 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		List<SuministroNodoCabezalBean> listaNodosConSaltos = new ArrayList<>();
 		List<SuministroNodoCabezalBean> listaNodosSinMov = new ArrayList<>();
 		List<SuministroBean> listaNumDAS = new ArrayList<>();
-		
+
 		listaNodosConSaltos = suministroDAO.consultarUltimosSumNodos();
-		LOGGER.info("[crearInformeSumPerdidos] contarSurConSaltos {} ",listaNodosConSaltos);
+		LOGGER.info("[crearInformeSumPerdidos] contarSurConSaltos {} ", listaNodosConSaltos);
 		listaNumDAS = suministroDAO.obtenerSaltoNumeraciosDAS();
-		LOGGER.info("[crearInformeSumPerdidos] contarDASConSaltos {} ",listaNumDAS);
-	    listaNodosSinMov = suministroDAO.consultarSinMovSumNodos();
-		LOGGER.info("[crearInformeSumPerdidos] contarSurSinUso {} ",listaNodosSinMov);
+		LOGGER.info("[crearInformeSumPerdidos] contarDASConSaltos {} ", listaNumDAS);
+		listaNodosSinMov = suministroDAO.consultarSinMovSumNodos();
+		LOGGER.info("[crearInformeSumPerdidos] contarSurSinUso {} ", listaNodosSinMov);
 
 		// Alertas + las 4 tablas de control
 		StringBuilder resultStringBuilder = new StringBuilder();
@@ -153,16 +152,16 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		createBodySinMovMail(listaNodosSinMov, resultStringBuilder);
 		createBodyControlMovMail(resultStringBuilder);
 
-		LOGGER.info("[crearInformeSumPerdidos] enviarCorreo {} ",resultStringBuilder.toString());
-		
+		LOGGER.info("[crearInformeSumPerdidos] enviarCorreo {} ", resultStringBuilder.toString());
+
 		List<PersonalBean> listaPersonal = personalGestor.obtenerPersonasRemitentes();
-		enviarCorreo(listaPersonal, resultStringBuilder.toString());		
+		enviarCorreo(listaPersonal, resultStringBuilder.toString());
 		LOGGER.info("[crearInformeSumPerdidos] FIN ");
 	}
 
-	
 	/**
 	 * Construye el bloque HTML de resumen filtrado por puntos de suministro.
+	 * 
 	 * @param idsPuntoSuministroFiltro
 	 * @return
 	 */
@@ -187,7 +186,8 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	}
 
 	/**
-	 *Elimina las etiquetas html y body externas del contenido.
+	 * Elimina las etiquetas html y body externas del contenido.
+	 * 
 	 * @param html
 	 * @return
 	 */
@@ -196,7 +196,8 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	}
 
 	/**
-	 *Filtra una lista de nodos por los puntos de suministro indicados.
+	 * Filtra una lista de nodos por los puntos de suministro indicados.
+	 * 
 	 * @param lista
 	 * @param idsPuntoSuministroFiltro
 	 * @return
@@ -208,7 +209,8 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 			if (item != null
 					&& item.getSurtidor() != null
 					&& item.getSurtidor().getPuntoSuministro() != null
-					&& idsPuntoSuministroFiltro.contains(item.getSurtidor().getPuntoSuministro().getIdPuntoSuministro())) {
+					&& idsPuntoSuministroFiltro
+							.contains(item.getSurtidor().getPuntoSuministro().getIdPuntoSuministro())) {
 				result.add(item);
 			}
 		}
@@ -216,7 +218,8 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	}
 
 	/**
-	 *Filtra una lista de suministros por los puntos de suministro indicados.
+	 * Filtra una lista de suministros por los puntos de suministro indicados.
+	 * 
 	 * @param lista
 	 * @param idsPuntoSuministroFiltro
 	 * @return
@@ -235,33 +238,34 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	}
 
 	/**
-	 *Genera el bloque HTML de surtidores sin movimiento.
+	 * Genera el bloque HTML de surtidores sin movimiento.
+	 * 
 	 * @param listaNodosSinMov
 	 * @param resultStringBuilder
 	 */
 	private void createBodySinMovMail(List<SuministroNodoCabezalBean> listaNodosSinMov,
 			StringBuilder resultStringBuilder) {
 		LOGGER.info("[createBodySinMovMail] INICIO");
-		resultStringBuilder.append("<p><b>Surtidores - Días sin enviar movimientos: </b></p>");	
-		if(null != listaNodosSinMov && !listaNodosSinMov.isEmpty()) {
+		resultStringBuilder.append("<p><b>Surtidores - Días sin enviar movimientos: </b></p>");
+		if (null != listaNodosSinMov && !listaNodosSinMov.isEmpty()) {
 			resultStringBuilder.append(OPEN_UL);
 			for (SuministroNodoCabezalBean entry : listaNodosSinMov) {
-			    resultStringBuilder.append(OPEN_LI)
-			    			.append(entry.getSurtidor().getPuntoSuministro().getNombre()
-			    				.concat(GUION+entry.getSurtidor().getNombre()))
-			    			.append(PUNTOS_SEGUIDOS)
-			    			.append(" Lleva "+entry.getDiferenciaTiempo()+" días sin enviar suministros.")
-			    			.append(CLOSE_LI);
-			}	
+				resultStringBuilder.append(OPEN_LI)
+						.append(entry.getSurtidor().getPuntoSuministro().getNombre()
+								.concat(GUION + entry.getSurtidor().getNombre()))
+						.append(PUNTOS_SEGUIDOS)
+						.append(" Lleva " + entry.getDiferenciaTiempo() + " días sin enviar suministros.")
+						.append(CLOSE_LI);
+			}
 			resultStringBuilder.append(CLOSE_UL);
 		}
-		
+
 		LOGGER.info("[createBodySinMovMail] FIN");
 	}
 
-
 	/**
-	 *Genera las tablas de control completas para el correo.
+	 * Genera las tablas de control completas para el correo.
+	 * 
 	 * @param resultStringBuilder
 	 */
 	private void createBodyControlMovMail(StringBuilder resultStringBuilder) {
@@ -269,13 +273,13 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	}
 
 	/**
-	 *Genera las tablas de control filtradas por punto de suministro.
+	 * Genera las tablas de control filtradas por punto de suministro.
+	 * 
 	 * @param resultStringBuilder
 	 * @param idsPuntoSuministroFiltro
 	 */
 	private void createBodyControlMovMail(StringBuilder resultStringBuilder, Set<Integer> idsPuntoSuministroFiltro) {
 		LOGGER.info("[createBodyControlMovMail] INICIO FILTRADO");
-
 
 		List<FilaControl> filas = calcularFilas(idsPuntoSuministroFiltro);
 		crearTablasControl(resultStringBuilder, filas);
@@ -287,6 +291,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	/**
 	 * Pinta las tablas de control a partir de las filas ya calculadas.
 	 * Las tablas CUB solo se pintan si algún punto tiene CUB.
+	 * 
 	 * @param resultStringBuilder
 	 * @param filas
 	 */
@@ -314,11 +319,13 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	/**
 	 * Cabecera de la tabla de Totalizadores.
 	 *
-	 * @param resultStringBuilder HTML con la tabla comprobación diaria de los litros registrados
+	 * @param resultStringBuilder HTML con la tabla comprobación diaria de los
+	 *                            litros registrados
 	 */
-	private void cabeceraTablaTotalizadores(StringBuilder resultStringBuilder){
+	private void cabeceraTablaTotalizadores(StringBuilder resultStringBuilder) {
 
-		resultStringBuilder.append(creacionTabla("Totalizadores","NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
+		resultStringBuilder.append(
+				creacionTabla("Totalizadores", "NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
 
 		Map<String, String> columnas = new LinkedHashMap<>();
 
@@ -337,73 +344,78 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 
 	/**
 	 * Cabecera de la tabla de Litros reguistrados Ayer.
+	 * 
 	 * @param resultStringBuilder
 	 */
-	private void cabeceraTablaLitrosMovidos(StringBuilder resultStringBuilder){
+	private void cabeceraTablaLitrosMovidos(StringBuilder resultStringBuilder) {
 
-		resultStringBuilder.append(creacionTabla("Litros Registrados","NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
+		resultStringBuilder.append(creacionTabla("Litros Registrados",
+				"NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
 
-		Map<String,String> columnas = new LinkedHashMap<>();
+		Map<String, String> columnas = new LinkedHashMap<>();
 
-		columnas.put("Punto de Suministro",OPEN_TH_STYLE);
-		columnas.put("NumSUM",OPEN_TH_STYLE);
-		columnas.put("NumSUMCab",OPEN_TH_STYLE);
-		columnas.put("NumDES",OPEN_TH_STYLE);
-		columnas.put("NumDESCon",OPEN_TH_STYLE);
-		columnas.put("NT_F",OPEN_TH_STYLE);
-		columnas.put("NT_I",OPEN_TH_STYLE);
-		columnas.put("TL_D",OPEN_TH_STYLE);
-		columnas.put("TL_D_Por_Procesar",OPEN_TH_STYLE);
-		columnas.put("TL_S",OPEN_TH_STYLE);
-		columnas.put("TL_S_Por_Procesar",OPEN_TH_STYLE);
-		columnas.put("Diferencia de litros",OPEN_TH_STYLEYellow);
-		columnas.put("AVG",OPEN_TH_STYLEOrange);
+		columnas.put("Punto de Suministro", OPEN_TH_STYLE);
+		columnas.put("NumSUM", OPEN_TH_STYLE);
+		columnas.put("NumSUMCab", OPEN_TH_STYLE);
+		columnas.put("NumDES", OPEN_TH_STYLE);
+		columnas.put("NumDESCon", OPEN_TH_STYLE);
+		columnas.put("NT_F", OPEN_TH_STYLE);
+		columnas.put("NT_I", OPEN_TH_STYLE);
+		columnas.put("TL_D", OPEN_TH_STYLE);
+		columnas.put("TL_D_Por_Procesar", OPEN_TH_STYLE);
+		columnas.put("TL_S", OPEN_TH_STYLE);
+		columnas.put("TL_S_Por_Procesar", OPEN_TH_STYLE);
+		columnas.put("Diferencia de litros", OPEN_TH_STYLEYellow);
+		columnas.put("AVG", OPEN_TH_STYLEOrange);
 
 		crearCabeceras(resultStringBuilder, columnas);
 	}
 
 	/**
 	 * Cabecera de la tabla de Litros reguistrados desde CUB.
+	 * 
 	 * @param resultStringBuilder
 	 */
 
-	private void cabeceraTablaLitrosMovidosCUB(StringBuilder resultStringBuilder){
+	private void cabeceraTablaLitrosMovidosCUB(StringBuilder resultStringBuilder) {
 
-		resultStringBuilder.append(creacionTabla("Litros reguistrados desde CUB","NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
+		resultStringBuilder.append(creacionTabla("Litros registrados desde CUB",
+				"NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
 
-		Map<String,String> columnas = new LinkedHashMap<>();
+		Map<String, String> columnas = new LinkedHashMap<>();
 
-		columnas.put("Punto de Suministro",OPEN_TH_STYLE);
-		columnas.put("NT_F",OPEN_TH_STYLE);
-		columnas.put("NT_I",OPEN_TH_STYLE);
-		columnas.put("TL_D",OPEN_TH_STYLE);
-		columnas.put("TL_D_Por_Procesar",OPEN_TH_STYLE);
-		columnas.put("TL_S",OPEN_TH_STYLE);
-		columnas.put("TL_S_Por_Procesar",OPEN_TH_STYLE);
-		columnas.put("Diferencia de litros",OPEN_TH_STYLEYellow);
-		columnas.put("AVG",OPEN_TH_STYLEOrange);
-		
+		columnas.put("Punto de Suministro", OPEN_TH_STYLE);
+		columnas.put("NT_F", OPEN_TH_STYLE);
+		columnas.put("NT_I", OPEN_TH_STYLE);
+		columnas.put("TL_D", OPEN_TH_STYLE);
+		columnas.put("TL_D_Por_Procesar", OPEN_TH_STYLE);
+		columnas.put("TL_S", OPEN_TH_STYLE);
+		columnas.put("TL_S_Por_Procesar", OPEN_TH_STYLE);
+		columnas.put("Diferencia de litros", OPEN_TH_STYLEYellow);
+		columnas.put("AVG", OPEN_TH_STYLEOrange);
+
 		crearCabeceras(resultStringBuilder, columnas);
 	}
 
 	/**
 	 * Cabecera de la tabla de Mermas - Excesos.
+	 * 
 	 * @param resultStringBuilder
 	 */
+	private void cabeceraTablaMermasExcesos(StringBuilder resultStringBuilder) {
 
-	private void cabeceraTablaMermasExcesos(StringBuilder resultStringBuilder){
-
-		resultStringBuilder.append(creacionTabla("Mermas o Excesos","NT_F - NT_I = Dif litros | ET Fin -  ET Ini = Dif ET | Dif litros - Dif ET = Mermas o Excesos "));
+		resultStringBuilder.append(creacionTabla("Mermas o Excesos",
+				"NT_F - NT_I = Dif litros | ET Fin -  ET Ini = Dif ET | Dif litros - Dif ET = Mermas o Excesos "));
 		crearCabeceras(resultStringBuilder, cabecerasMermas());
-		
+
 	}
 
 	/**
 	 * Cabecera de la tabla de Mermas - Excesos desde CUB.
 	 */
-	private void cabeceraTablaMermasExcesosCUB(StringBuilder resultStringBuilder){
-		
-		resultStringBuilder.append(creacionTabla("Mermas o Excesos desde CUB",""));
+	private void cabeceraTablaMermasExcesosCUB(StringBuilder resultStringBuilder) {
+
+		resultStringBuilder.append(creacionTabla("Mermas o Excesos desde CUB", ""));
 		crearCabeceras(resultStringBuilder, cabecerasMermas());
 
 	}
@@ -419,48 +431,53 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		c.put("ET Ini", OPEN_TH_STYLE);
 		c.put("Dif ET", OPEN_TH_STYLEYellow);
 		c.put("Mermas o Excesos", OPEN_TH_STYLEOrange);
+		c.put("AVG", OPEN_TH_STYLE);
 		return c;
 	}
 
 	private void crearCabeceras(StringBuilder sb,
-                            Map<String, String> columnas) {
+			Map<String, String> columnas) {
 
 		for (Map.Entry<String, String> columna : columnas.entrySet()) {
 			sb.append(columna.getValue())
-			.append(columna.getKey())
-			.append(CLOSE_TH);
+					.append(columna.getKey())
+					.append(CLOSE_TH);
 		}
 		sb.append(CLOSE_TR);
 	}
-	
+
 	/**
-	* Cuerpo de la tabla de Totalizadores.
-	*/
+	 * Cuerpo de la tabla de Totalizadores.
+	 */
 	private void cuerpoTablaTotalizadores(StringBuilder sb, List<FilaControl> filas) {
-    NumberFormat nf = formatoNumero();
+		NumberFormat nf = formatoNumero();
 
-    for (FilaControl f : filas) {
-        double sumTlS = f.tlS + f.tlSPP;
-        double difTot = f.totFin - f.totIni;
-        double difVsSum = difTot - sumTlS;
+		for (FilaControl f : filas) {
+			double sumTlS = f.tlS + f.tlSPP;
+			double difTot = f.totFin - f.totIni;
+			double difVsSum = difTot - sumTlS;
 
-      	String difVsSumTexto = nf.format(difVsSum);
+			String difVsSumTexto = nf.format(difVsSum);
+			String puntoSuministroText = String.valueOf(f.nombre);
+			String difTotText = String.valueOf(nf.format(difTot));
 
-		if (Math.abs(difVsSum) > 3) {
-		difVsSumTexto = "<span style='color:red;font-weight:bold;'>"
-		+ difVsSumTexto
-		+ "</span>";
+			// regla : AVG > 5 %
+			if (Math.abs(difVsSum) > 3) {
+				difVsSumTexto = rojo(difVsSumTexto);
+				puntoSuministroText = rojo(puntoSuministroText);
+				difTotText = rojo(puntoSuministroText);
+			}
+
+			fila(sb, null, puntoSuministroText, nf.format(f.tlS), nf.format(f.tlSPP), nf.format(sumTlS),
+					nf.format(f.totIni), nf.format(f.totFin), difTotText, difVsSumTexto);
 		}
 
-        fila(sb, null, f.nombre,nf.format(f.tlS),nf.format(f.tlSPP),nf.format(sumTlS),nf.format(f.totIni),nf.format(f.totFin),nf.format(difTot), difVsSumTexto);
-    }
-
-    cerrarTabla(sb);
-}
+		cerrarTabla(sb);
+	}
 
 	/**
-	* Cuerpo de la tabla de Litros movidos Ayer.
-	*/
+	 * Cuerpo de la tabla de Litros movidos Ayer.
+	 */
 	private void cuerpoTablaLitrosMovidos(StringBuilder sb, List<FilaControl> filas) {
 		NumberFormat nf = formatoNumero();
 		NumberFormat pct = formatoPorcentaje();
@@ -468,58 +485,89 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 			double avg = ratio(f.difLitros, f.tlS + f.tlSPP);
 
 			String avgTexto = pct.format(avg);
-			if (avg > 0.05) {
-			avgTexto = "<span style='color:red;font-weight:bold;'>" + avgTexto + "</span>";
-			}
-		 // regla del Excel: AVG > 5 %
+			String difLitrosText = String.valueOf(f.difLitros);
+			String puntoSuministroText = f.nombre;
 
-			fila(sb, null,f.nombre, String.valueOf(f.numSum),String.valueOf(f.numSumCab),
-			String.valueOf(f.numDes),String.valueOf(f.numDesCon),nf.format(f.ntF),nf.format(f.ntI),nf.format(f.tlD),nf.format(f.tlDPP), nf.format(f.tlS),
-        	nf.format(f.tlSPP), nf.format(f.difLitros),avgTexto);
+			// regla : AVG > 5 %
+			if (avg > 0.05) {
+				avgTexto = rojo(avgTexto);
+				difLitrosText = rojo(difLitrosText);
+				puntoSuministroText = rojo(puntoSuministroText);
+			}
+
+			fila(sb, null, puntoSuministroText, String.valueOf(f.numSum), String.valueOf(f.numSumCab),
+					String.valueOf(f.numDes), String.valueOf(f.numDesCon), nf.format(f.ntF), nf.format(f.ntI),
+					nf.format(f.tlD), nf.format(f.tlDPP), nf.format(f.tlS),
+					nf.format(f.tlSPP), difLitrosText, avgTexto);
 		}
 		cerrarTabla(sb);
 	}
 
 	/**
-	* Cuerpo de la tabla de Litros movidos desde CUB.
-	*/
+	 * Cuerpo de la tabla de Litros movidos desde CUB.
+	 */
 	private void cuerpoTablaLitrosMovidosCUB(StringBuilder sb, List<FilaControl> filas) {
 		NumberFormat nf = formatoNumero();
 		NumberFormat pct = formatoPorcentaje();
 		for (FilaControl f : filas) {
 			if (f.fechaCub == null) {
-				continue;                                                  // solo puntos con CUB
+				continue;
 			}
-		double avg = ratio(f.difCub, f.tlSCub + f.tlSPPCub);
-		String avgTexto = pct.format(avg);
-		if (avg > 0.05) {
-		avgTexto = "<span style='color:red;font-weight:bold;'>" + avgTexto + "</span>";
-		}
-			fila(sb, null, f.nombre, nf.format(f.ntF), nf.format(f.ntICub),
+			double avg = ratio(f.difCub, f.tlSCub + f.tlSPPCub);
+			String avgTexto = pct.format(avg);
+			String difLitrosCubicacionText = String.valueOf(f.difCub);
+			String puntoSuministroText = String.valueOf(f.nombre);
+
+			// regla : AVG > 5 %
+			if (avg > 0.05) {
+				avgTexto = rojo(avgTexto);
+				difLitrosCubicacionText = rojo(difLitrosCubicacionText);
+				puntoSuministroText = rojo(puntoSuministroText);
+			}
+
+			fila(sb, null, puntoSuministroText, nf.format(f.ntF), nf.format(f.ntICub),
 					nf.format(f.tlDCub), nf.format(f.tlDPPCub), nf.format(f.tlSCub), nf.format(f.tlSPPCub),
-					nf.format(f.difCub), avgTexto);
+					difLitrosCubicacionText, avgTexto);
 		}
+
 		cerrarTabla(sb);
 	}
 
 	/**
-	* Cuerpo de la tabla de Mermas - Excesos.
-	*/
+	 * Cuerpo de la tabla de Mermas - Excesos.
+	 */
 	private void cuerpoTablaMermasExcesos(StringBuilder sb, List<FilaControl> filas) {
 		NumberFormat nf = formatoNumero();
-		for (FilaControl f : filas) {
-			String color = null;                                           // regla pendiente de decidir
+		NumberFormat pct = formatoPorcentaje();
 
-			fila(sb, null, f.nombre, nf.format(f.ntF), nf.format(f.ntI), nf.format(f.ntF - f.ntI),
-					nf.format(f.etFin), nf.format(f.etIni), nf.format(f.etFin - f.etIni),
-					nf.format(f.ntF - f.etFin));
-		}
+		for (FilaControl f : filas) {
+
+			double difLitros = f.ntF - f.ntICub;
+			double difEt = f.etFin - f.etIniCub;
+			double mermas = difLitros - difEt;
+			double avg = ratio(mermas, f.tlSCub + f.tlSPPCub);
+
+			String puntoSuministro = f.nombre;
+			String mermasExceso = nf.format(mermas);
+			String avgTexto = pct.format(avg);
+
+			//TODO: POR DEFINIR EL AVG 
+			if (avg > 0.01) {
+				puntoSuministro = rojo(puntoSuministro);
+				mermasExceso = rojo(mermasExceso);
+				avgTexto = rojo(avgTexto);
+			}
+
+			fila(sb, null, puntoSuministro, nf.format(f.ntF), nf.format(f.ntICub), nf.format(difLitros),
+					nf.format(f.etFin), nf.format(f.etIniCub), nf.format(difEt),
+					mermasExceso, avgTexto);
+			}
 		cerrarTabla(sb);
 	}
 
 	/**
-	* Cuerpo de la tabla de Mermas - Excesos CUB.
-	*/
+	 * Cuerpo de la tabla de Mermas - Excesos CUB.
+	 */
 	private void cuerpoTablaMermasExcesosCUB(StringBuilder sb, List<FilaControl> filas) {
 		NumberFormat nf = formatoNumero();
 		for (FilaControl f : filas) {
@@ -534,7 +582,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		}
 		cerrarTabla(sb);
 	}
-	
+
 	private List<FilaControl> calcularFilas(Set<Integer> idsPuntoSuministroFiltro) {
 		List<FilaControl> filas = new ArrayList<>();
 		List<PuntoSuministroBean> listaPuntosSuministro = iGestorPuntoSuministro.consultarPuntosSuministro();
@@ -584,8 +632,8 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 				sumNodCab.setSurtidor(surt);
 				sumNodCab.setFechaInicioSuministro(filtroNumerarBean.getFechaInicioDesde());
 				sumNodCab.setFechaFinSuministro(filtroNumerarBean.getFechaInicioHasta());
-				List<SuministroNodoCabezalBean> listaSuministroNodoCabezal =
-						iGestorSuministroNodoCabezal.consultarSuministrosNodoCabezal(sumNodCab);
+				List<SuministroNodoCabezalBean> listaSuministroNodoCabezal = iGestorSuministroNodoCabezal
+						.consultarSuministrosNodoCabezal(sumNodCab);
 				numerarBean = verificarListaSum(numerarBean, listaSuministroNodoCabezal);
 
 				Integer diferencia = numerarBean.getNumUltimoSuministro() - numerarBean.getNumPrimerSuministro();
@@ -596,7 +644,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 				numerarBean.setDifLitros(numerarBean.getDifTotal() - numerarBean.getSumLitros());
 
 				listaSuministroNodoCabezal = checkLitrosSaltos(listaSuministroNodoCabezal);
-				listaSumNodoCab.addAll(listaSuministroNodoCabezal);   // para NumSUMCab
+				listaSumNodoCab.addAll(listaSuministroNodoCabezal); // para NumSUMCab
 				sumLitros += numerarBean.getSumLitros();
 			}
 
@@ -618,8 +666,8 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 				descNodCon.setFechaFinDescarga(c.getTime());
 				descNodCon.setTanque(tanq);
 
-				List<DescargaNodoConsolaBean> listaDescargaNodoConsola =
-						iGestorDescargaNodoConsola.recuperarDescargasEntreFechasTanque(descNodCon);
+				List<DescargaNodoConsolaBean> listaDescargaNodoConsola = iGestorDescargaNodoConsola
+						.recuperarDescargasEntreFechasTanque(descNodCon);
 				NivelTanqueBean nivelTanque = iGestorNivelTanque.ultimoNivelTanque(tanq.getIdTanque());
 				numerarBeanTanques.setUltimoNivelRegistrado(nivelTanque.getVolumenNeto().intValue());
 				numerarBeanTanques.setFechaRegistro(nivelTanque.getFechaNivelTanque());
@@ -629,15 +677,15 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
 
 				// Nivel final del tanque (NT_F)
-				List<NivelTanqueBean> list_ntf =
-						iGestorNivelTanque.consultarUltimoNivelTanques(filtroNumerarBean.getFechaInicioHasta(), listTanque);
+				List<NivelTanqueBean> list_ntf = iGestorNivelTanque
+						.consultarUltimoNivelTanques(filtroNumerarBean.getFechaInicioHasta(), listTanque);
 				numerarBeanTanques = obtenerUltimoNivelFecha(numerarBeanTanques, list_ntf);
 				numerarBeanTanques = compruebaSiExisteNivelFinal(filtroNumerarBean, numerarBeanTanques, sdf);
 				nt_f = getNt_f(nt_f, numerarBeanTanques);
 
 				// Nivel inicial del tanque (NT_I)
-				List<NivelTanqueBean> list_nti =
-						iGestorNivelTanque.consultarPrimerNivelTanques(filtroNumerarBean.getFechaInicioDesde(), listTanque);
+				List<NivelTanqueBean> list_nti = iGestorNivelTanque
+						.consultarPrimerNivelTanques(filtroNumerarBean.getFechaInicioDesde(), listTanque);
 				for (NivelTanqueBean nti : list_nti) {
 					numerarBeanTanques.setPrimerNivelFecha(nti.getVolumenNeto().intValue());
 					numerarBeanTanques.setFechaRegPrimer(nti.getFechaNivelTanque());
@@ -649,7 +697,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 				numerarBeanTanques = verificacionLista(numerarBeanTanques, listaDescargaNodoConsola);
 
 				volumenDescargadoTotal += numerarBeanTanques.getVolumenDescargado();
-				listaDescNodoCon.addAll(listaDescargaNodoConsola);    // para NumDESCon
+				listaDescNodoCon.addAll(listaDescargaNodoConsola); // para NumDESCon
 			}
 
 			// --- Suministros y descargas procesados (tablas de la BBDD) ---
@@ -659,15 +707,15 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 			sum.setFechaFin(filtroNumerarBean.getFechaInicioHasta());
 
 			List<SuministroBean> listaSum = iGestorSuministro.consultarSuministrosPuntoFechas(sum);
-			List<SuministroNodoCabezalBean> listaSuministrosNodoNoProcesados =
-					iGestorSuministroNodoCabezal.consultarSuministrosNoProcesados(puntoSuministro);
+			List<SuministroNodoCabezalBean> listaSuministrosNodoNoProcesados = iGestorSuministroNodoCabezal
+					.consultarSuministrosNoProcesados(puntoSuministro);
 			Float litrosSuministroNodoNoProcesados = obtenerLitrosSuministroNodoNoProcesados(
 					listaSuministrosNodoNoProcesados, 0f, filtroNumerarBean.getFechaInicioDesde());
 
 			List<DescargaBean> listaDes = iGestorDescarga.descargasPuntoFechas(sum);
 			DatosSumDesMovimientoBean datosSumDesMovimiento = recorrerListaSumDes(listaSum, listaDes);
-			List<DescargaNodoConsolaBean> listaDescargasNodosNoProcesada =
-					iGestorDescargaNodoConsola.consultarListaDescargasNodoConsolaSinProcesar(puntoSuministro);
+			List<DescargaNodoConsolaBean> listaDescargasNodosNoProcesada = iGestorDescargaNodoConsola
+					.consultarListaDescargasNodoConsolaSinProcesar(puntoSuministro);
 			Double litrosDescargaNodoNoProcesados = obtenerLitrosDescargaNodoNoProcesados(
 					listaDescargasNodosNoProcesada, 0d, filtroNumerarBean.getFechaInicioDesde());
 
@@ -691,7 +739,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 			f.tlDPP = litrosDescargaNodoNoProcesados;
 			f.tlS = datosSumDesMovimiento.getTotalLitrosSum();
 			f.tlSPP = litrosSuministroNodoNoProcesados;
-			f.difLitros = -excedenteLitros;               // con signo, como el Excel
+			f.difLitros = -excedenteLitros; // con signo, como el Excel
 			f.numSum = listaSum.size();
 			f.numSumCab = listaSumNodoCab.size();
 			f.numDes = listaDes.size();
@@ -743,9 +791,10 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 
 	/**
 	 *
-	 * @param titulo De la tabla
-	 * @param formula utilizada ejemplo NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar
-	 * @return 
+	 * @param titulo  De la tabla
+	 * @param formula utilizada ejemplo NT_F = NT_I + TL_D + TL_D_Por_Procesar -
+	 *                TL_S - TL_S_Por_Procesar
+	 * @return
 	 */
 	private String creacionTabla(String titulo, String formula) {
 		StringBuilder sb = new StringBuilder();
@@ -763,7 +812,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		return base == 0 ? 0 : Math.abs(dif) / base;
 	}
 
-	private void pie(StringBuilder resultStringBuilder){
+	private void pie(StringBuilder resultStringBuilder) {
 		resultStringBuilder.append("<pre><br>"
 				+ "<i>* NT_F: Nivel final de los tanques para el día anterior.</i><br>"
 				+ "<i>* NT_I: Nivel inicial de los tanques para el día anterior.</i><br>"
@@ -796,7 +845,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	}
 
 	private void createBodySaltosDASMail(List<SuministroBean> listaNumDAS,
-									  StringBuilder resultStringBuilder) {
+			StringBuilder resultStringBuilder) {
 		LOGGER.info("[createBodySaltosDASMail] INICIO");
 		resultStringBuilder.append("<p><b>Documentos de Suministro con Posibles Saltos de Numeración: </b></p>");
 
@@ -817,7 +866,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 
 					resultStringBuilder.append(OPEN_LI)
 							.append("Número de documento faltante: ").append(s.getNumeroDocumento())
-							.append(" - Motivo: ").append((error!=null) ? error : "No se encontró motivo")
+							.append(" - Motivo: ").append((error != null) ? error : "No se encontró motivo")
 							.append(CLOSE_LI);
 				}
 
@@ -834,10 +883,11 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		LOGGER.info("[createBodySaltosDASMail] FIN");
 	}
 
-	private String obtenerError(Integer idSuministro){
+	private String obtenerError(Integer idSuministro) {
 		String error = null;
-		List<ErrorNumeracionSuministroBean> listaError = iErrorNumeracionSuministroDAO.obtenerErroresPorIdSuministro(idSuministro);
-		if (listaError!=null && !listaError.isEmpty())  {
+		List<ErrorNumeracionSuministroBean> listaError = iErrorNumeracionSuministroDAO
+				.obtenerErroresPorIdSuministro(idSuministro);
+		if (listaError != null && !listaError.isEmpty()) {
 			error = listaError.get(0).getMensaje();
 		}
 		return error;
@@ -859,8 +909,13 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 
 	/* ===================== MÉTODOS AUXILIARES ===================== */
 
+	// Texto en rojo y negrita para los valores que superan la regla
+	private String rojo(String texto) {
+		return "<span style='color:red;font-weight:bold;'>" + texto + "</span>";
+	}
+
 	private NumberFormat formatoNumero() {
-    	return NumberFormat.getNumberInstance(Locale.GERMANY);
+		return NumberFormat.getNumberInstance(Locale.GERMANY);
 	}
 
 	private NumberFormat formatoPorcentaje() {
@@ -882,7 +937,8 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		return sb.append("\">").toString();
 	}
 
-	// Una fila: primera columna a la izquierda, el resto a la derecha. color null = sin color
+	// Una fila: primera columna a la izquierda, el resto a la derecha. color null =
+	// sin color
 	private void fila(StringBuilder sb, String color, String... valores) {
 		sb.append(OPEN_TR);
 		for (int i = 0; i < valores.length; i++) {
@@ -904,7 +960,8 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		return false;
 	}
 
-	// TODO: devolver la fecha de la última CUB del punto. Mientras devuelva null no salen las tablas CUB.
+	// TODO: devolver la fecha de la última CUB del punto. Mientras devuelva null no
+	// salen las tablas CUB.
 	private Date obtenerFechaCub(PuntoSuministroBean punto) {
 		return null;
 	}
@@ -932,8 +989,8 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	}
 
 	private void procesarGrupo(List<SuministroBean> grupo,
-							   List<SuministroBean> resultado,
-							   DecimalFormat formatter) {
+			List<SuministroBean> resultado,
+			DecimalFormat formatter) {
 
 		ordenarPorNumeroDocumento(grupo);
 
@@ -953,9 +1010,9 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	}
 
 	private void agregarFaltantesSiExisten(SuministroBean actual,
-										   SuministroBean siguiente,
-										   List<SuministroBean> resultado,
-										   DecimalFormat formatter) {
+			SuministroBean siguiente,
+			List<SuministroBean> resultado,
+			DecimalFormat formatter) {
 
 		double numeroActual = Double.parseDouble(actual.getNumeroDocumento());
 		double numeroSiguiente = Double.parseDouble(siguiente.getNumeroDocumento());
@@ -968,10 +1025,10 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	}
 
 	private void crearSuministrosFaltantes(SuministroBean base,
-										   double inicio,
-										   double fin,
-										   List<SuministroBean> resultado,
-										   DecimalFormat formatter) {
+			double inicio,
+			double fin,
+			List<SuministroBean> resultado,
+			DecimalFormat formatter) {
 
 		for (double faltante = inicio + 1; faltante < fin; faltante++) {
 			SuministroBean nuevo = copiarSuministro(base);
@@ -995,7 +1052,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		return copia;
 	}
 
-	private Map<String, List<SuministroBean>> agruparPorPuntoSuministro(List<SuministroBean> lista){
+	private Map<String, List<SuministroBean>> agruparPorPuntoSuministro(List<SuministroBean> lista) {
 		Map<String, List<SuministroBean>> grupos = new HashMap<String, List<SuministroBean>>();
 
 		for (SuministroBean s : lista) {
@@ -1015,52 +1072,57 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 			StringBuilder resultStringBuilder) {
 		LOGGER.info("[createBodySaltosMail] INICIO");
 		resultStringBuilder.append(OPEN_HTML_BODY);
-		/*resultStringBuilder.append(OPEN_TABLE);
-		resultStringBuilder.append(OPEN_TR);
-		resultStringBuilder.append(OPEN_TD);*/
+		/*
+		 * resultStringBuilder.append(OPEN_TABLE);
+		 * resultStringBuilder.append(OPEN_TR);
+		 * resultStringBuilder.append(OPEN_TD);
+		 */
 		resultStringBuilder.append("<b style='color:#0F4C81;'>COMPROBACIÓN DIARIA MOVIMIENTOS</b>");
-		/*resultStringBuilder.append(CLOSE_TD);
-		resultStringBuilder.append(CLOSE_TR);
-		resultStringBuilder.append(CLOSE_TABLE);*/
+		/*
+		 * resultStringBuilder.append(CLOSE_TD);
+		 * resultStringBuilder.append(CLOSE_TR);
+		 * resultStringBuilder.append(CLOSE_TABLE);
+		 */
 		resultStringBuilder.append(ETIQUETA_BR)
-		.append("<p><b>Surtidores con Posibles Saltos de Numeración: </b></p>");	
+				.append("<p><b>Surtidores con Posibles Saltos de Numeración: </b></p>");
 
 		if (listaNodosConSaltos != null && !listaNodosConSaltos.isEmpty()) {
-		    resultStringBuilder.append(OPEN_UL);
-		    for (SuministroNodoCabezalBean entry : listaNodosConSaltos) {
-		        resultStringBuilder.append(OPEN_LI)
-		                           .append(entry.getSurtidor().getPuntoSuministro().getNombre()
-		                           .concat(GUION+entry.getSurtidor().getNombre()))
-		                           .append(PUNTOS_SEGUIDOS)
-		                           .append(" Tiene Saltos de Numeración")
-		                           .append(CLOSE_LI);
-		    }
-		    resultStringBuilder.append(CLOSE_UL);
+			resultStringBuilder.append(OPEN_UL);
+			for (SuministroNodoCabezalBean entry : listaNodosConSaltos) {
+				resultStringBuilder.append(OPEN_LI)
+						.append(entry.getSurtidor().getPuntoSuministro().getNombre()
+								.concat(GUION + entry.getSurtidor().getNombre()))
+						.append(PUNTOS_SEGUIDOS)
+						.append(" Tiene Saltos de Numeración")
+						.append(CLOSE_LI);
+			}
+			resultStringBuilder.append(CLOSE_UL);
 		} else {
 			resultStringBuilder.append(OPEN_UL)
-				.append(OPEN_LI)
-				.append("No se han detectado saltos.")
-				.append(CLOSE_LI)
-				.append(CLOSE_UL);
+					.append(OPEN_LI)
+					.append("No se han detectado saltos.")
+					.append(CLOSE_LI)
+					.append(CLOSE_UL);
 		}
 
-		LOGGER.info("[createBodySaltosMail] FIN");		
+		LOGGER.info("[createBodySaltosMail] FIN");
 	}
 
 	private void enviarCorreo(List<PersonalBean> listaPersonal, String cuerpoMensaje) {
 		LOGGER.info("[enviarCorreo] INICIO");
-		for (PersonalBean personal : listaPersonal) {			
-			String asuntoMensajeParam = "[TEICO] Posibles Pérdidas del Día de Ayer";	
+		for (PersonalBean personal : listaPersonal) {
+			String asuntoMensajeParam = "[TEICO] Posibles Pérdidas del Día de Ayer";
 
-			if (!StringUtils.isEmpty(personal.getEmail()) && 
-					!gestorCorreo.enviarEmailHtml(personal.getEmail(), cuerpoMensaje.toString(), asuntoMensajeParam, null, null)) {
+			if (!StringUtils.isEmpty(personal.getEmail()) &&
+					!gestorCorreo.enviarEmailHtml(personal.getEmail(), cuerpoMensaje.toString(), asuntoMensajeParam,
+							null, null)) {
 				LOGGER.error("Error: No se logró enviar el email a " + personal.getEmail() + ".");
-			}			
+			}
 		}
 		LOGGER.info("[enviarCorreo] FIN ");
 	}
-	
-	private DatosSumDesMovimientoBean recorrerListaSumDes(List<SuministroBean> listaSum, List<DescargaBean> listaDes){
+
+	private DatosSumDesMovimientoBean recorrerListaSumDes(List<SuministroBean> listaSum, List<DescargaBean> listaDes) {
 		DatosSumDesMovimientoBean datosMov = new DatosSumDesMovimientoBean();
 		List<MovimientoBean> listaMovimientos = new ArrayList<>();
 		int numSum = 0;
@@ -1070,20 +1132,24 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		int totaLitrosSum = 0;
 		int totaLitrosDes = 0;
 
-		for(SuministroBean sum:listaSum){
-			List<SuministroSurtidorBean> listSumSurtidores = iSuministroDAO.obtenerSuministroSurtidorDetallePorIdSuministro(sum);
+		for (SuministroBean sum : listaSum) {
+			List<SuministroSurtidorBean> listSumSurtidores = iSuministroDAO
+					.obtenerSuministroSurtidorDetallePorIdSuministro(sum);
 			listaMovimientos = comprobarListaSumWebOAuto(listaMovimientos, sum, listSumSurtidores);
-			if(listaMovimientos.get(listaMovimientos.size()-1).getIdOperacion() == null || listaMovimientos.get(listaMovimientos.size()-1).getIdOperacion().isEmpty()){
+			if (listaMovimientos.get(listaMovimientos.size() - 1).getIdOperacion() == null
+					|| listaMovimientos.get(listaMovimientos.size() - 1).getIdOperacion().isEmpty()) {
 				numSumWeb += 1;
 			}
 			numSum += 1;
 			totaLitrosSum += sum.getLitrosSuministrados15();
 		}
 
-		for(DescargaBean des:listaDes){
-			List<DescargaTanqueBean> listaDesTanques = iDescargaTanqueDAO.obtenerDescargaTanqueDetallePorIdDescarga(des.getIdDescarga());
+		for (DescargaBean des : listaDes) {
+			List<DescargaTanqueBean> listaDesTanques = iDescargaTanqueDAO
+					.obtenerDescargaTanqueDetallePorIdDescarga(des.getIdDescarga());
 			listaMovimientos = comprobarListaDescWebOAuto(listaMovimientos, des, listaDesTanques);
-			if(listaMovimientos.get(listaMovimientos.size()-1).getIdOperacion() == null || listaMovimientos.get(listaMovimientos.size()-1).getIdOperacion().isEmpty()){
+			if (listaMovimientos.get(listaMovimientos.size() - 1).getIdOperacion() == null
+					|| listaMovimientos.get(listaMovimientos.size() - 1).getIdOperacion().isEmpty()) {
 				numDesWeb += 1;
 			}
 			numDes += 1;
@@ -1105,8 +1171,9 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		return datosMov;
 	}
 
-	private List<MovimientoBean> comprobarListaSumWebOAuto(List<MovimientoBean> listaMovimientos, SuministroBean sum, List<SuministroSurtidorBean> listSumSurtidores) {
-		if(listSumSurtidores != null && !listSumSurtidores.isEmpty()) {
+	private List<MovimientoBean> comprobarListaSumWebOAuto(List<MovimientoBean> listaMovimientos, SuministroBean sum,
+			List<SuministroSurtidorBean> listSumSurtidores) {
+		if (listSumSurtidores != null && !listSumSurtidores.isEmpty()) {
 			for (SuministroSurtidorBean sumSurt : listSumSurtidores) {
 				MovimientoBean mov = new MovimientoBean();
 				mov.setFechaInicio(sum.getFechaInicio());
@@ -1126,7 +1193,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 
 				listaMovimientos.add(mov);
 			}
-		}else{
+		} else {
 			MovimientoBean mov = new MovimientoBean();
 			mov.setFechaInicio(sum.getFechaInicio());
 			mov.setFechaFin(sum.getFechaFin());
@@ -1139,9 +1206,10 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		}
 		return listaMovimientos;
 	}
-	
-	private List<MovimientoBean> comprobarListaDescWebOAuto(List<MovimientoBean> listaMovimientos, DescargaBean des, List<DescargaTanqueBean> listaDesTanques) {
-		if(listaDesTanques != null && !listaDesTanques.isEmpty()) {
+
+	private List<MovimientoBean> comprobarListaDescWebOAuto(List<MovimientoBean> listaMovimientos, DescargaBean des,
+			List<DescargaTanqueBean> listaDesTanques) {
+		if (listaDesTanques != null && !listaDesTanques.isEmpty()) {
 			for (DescargaTanqueBean desTanq : listaDesTanques) {
 				MovimientoBean mov = new MovimientoBean();
 				mov.setFechaInicio(des.getFechaInicioDescarga());
@@ -1156,7 +1224,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 
 				listaMovimientos.add(mov);
 			}
-		}else{
+		} else {
 			MovimientoBean mov = new MovimientoBean();
 			mov.setFechaInicio(des.getFechaInicioDescarga());
 			mov.setFechaFin(des.getFechaFinDescarga());
@@ -1168,9 +1236,9 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		}
 		return listaMovimientos;
 	}
-	
+
 	private NumerarBean verificarListaSum(NumerarBean numerarBean, List<SuministroNodoCabezalBean> lista) {
-		if(lista.isEmpty()){
+		if (lista.isEmpty()) {
 			numerarBean.setNumSuministros(0);
 			numerarBean.setNumPrimerSuministro(0);
 			numerarBean.setNumUltimoSuministro(0);
@@ -1178,31 +1246,31 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 			numerarBean.setTotalFinal(0);
 			numerarBean.setDifTotal(0);
 			numerarBean.setNumOp(0);
-		}else{
+		} else {
 			numerarBean.setNumSuministros(lista.size());
 			numerarBean.setNumPrimerSuministro(lista.get(0).getNumSuministro());
-			numerarBean.setNumUltimoSuministro(lista.get(lista.size()-1).getNumSuministro());
+			numerarBean.setNumUltimoSuministro(lista.get(lista.size() - 1).getNumSuministro());
 			numerarBean.setTotalInicial(lista.get(0).getTotInicialTemp15().intValue());
 			numerarBean.setTotalFinal(lista.get(lista.size() - 1).getTotFinalTemp15().intValue());
 			numerarBean.setDifTotal(numerarBean.getTotalFinal() - numerarBean.getTotalInicial());
 		}
 		return numerarBean;
 	}
-	
+
 	private Integer comprobarDif(Integer diferencia) {
-		if(diferencia >0){
-			diferencia = diferencia +1;
+		if (diferencia > 0) {
+			diferencia = diferencia + 1;
 		}
 		return diferencia;
 	}
-	
-	private NumerarBean recorrerListaListro(List<SuministroNodoCabezalBean> lista, NumerarBean numerarBean){
 
-		int totalLitros= 0;
+	private NumerarBean recorrerListaListro(List<SuministroNodoCabezalBean> lista, NumerarBean numerarBean) {
+
+		int totalLitros = 0;
 		int numOp = 0;
-		for(SuministroNodoCabezalBean sum: lista){
-			totalLitros +=sum.getLitrosTemp15();
-			if(sum.getOpEspecial() == 1){
+		for (SuministroNodoCabezalBean sum : lista) {
+			totalLitros += sum.getLitrosTemp15();
+			if (sum.getOpEspecial() == 1) {
 				numOp += 1;
 			}
 		}
@@ -1210,72 +1278,78 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		numerarBean.setNumOp(numOp);
 		return numerarBean;
 	}
-	
-	private List<SuministroNodoCabezalBean> checkLitrosSaltos(List<SuministroNodoCabezalBean> lista){
+
+	private List<SuministroNodoCabezalBean> checkLitrosSaltos(List<SuministroNodoCabezalBean> lista) {
 		SuministroNodoCabezalBean sumNodAnt = null;
-		for(SuministroNodoCabezalBean sumNod : lista){
-			Integer checkLitros = sumNod.getTotFinalTemp15().intValueExact()-sumNod.getTotInicialTemp15().intValueExact();
-			sumNod.setCheckLitros((int) (sumNod.getLitrosTemp15()-checkLitros));
-			if(sumNodAnt == null) {
+		for (SuministroNodoCabezalBean sumNod : lista) {
+			Integer checkLitros = sumNod.getTotFinalTemp15().intValueExact()
+					- sumNod.getTotInicialTemp15().intValueExact();
+			sumNod.setCheckLitros((int) (sumNod.getLitrosTemp15() - checkLitros));
+			if (sumNodAnt == null) {
 				sumNod.setCheckSaltos(0);
-			}else{
-				sumNod.setCheckSaltos((sumNod.getNumSuministro()-sumNodAnt.getNumSuministro())-1);
+			} else {
+				sumNod.setCheckSaltos((sumNod.getNumSuministro() - sumNodAnt.getNumSuministro()) - 1);
 			}
 			sumNodAnt = sumNod;
 		}
 		return lista;
-	}	
-	
+	}
+
 	private NumerarBean obtenerUltimoNivelFecha(NumerarBean numerarBeanTanques, List<NivelTanqueBean> list_ntf) {
-		for(NivelTanqueBean ntf : list_ntf){
+		for (NivelTanqueBean ntf : list_ntf) {
 			numerarBeanTanques.setUltimoNivelFecha(ntf.getVolumenNeto().intValue());
 			numerarBeanTanques.setFechaRegUltimo(ntf.getFechaNivelTanque());
 		}
 		return numerarBeanTanques;
 	}
-	
+
 	private int getNt_f(int nt_f, NumerarBean numerarBeanTanques) {
-		if(numerarBeanTanques.getUltimoNivelFecha() != null){
+		if (numerarBeanTanques.getUltimoNivelFecha() != null) {
 			nt_f += numerarBeanTanques.getUltimoNivelFecha();
 		}
 		return nt_f;
 	}
 
 	private int getNt_i(int nt_i, NumerarBean numerarBeanTanques) {
-		if(numerarBeanTanques.getPrimerNivelFecha() != null) {
+		if (numerarBeanTanques.getPrimerNivelFecha() != null) {
 			nt_i += numerarBeanTanques.getPrimerNivelFecha();
 		}
 		return nt_i;
 	}
-	private NumerarBean compruebaSiExisteNivelFinal(FiltroNumerarWrapperBean filtroNumerarBean, NumerarBean numerarBeanTanques, SimpleDateFormat sdf) {
+
+	private NumerarBean compruebaSiExisteNivelFinal(FiltroNumerarWrapperBean filtroNumerarBean,
+			NumerarBean numerarBeanTanques, SimpleDateFormat sdf) {
 		boolean hayNivelFinal = false;
-		LOGGER.info("FECHA FINAL NIVEL: "+ sdf.format(numerarBeanTanques.getFechaRegUltimo()));
-		LOGGER.info("FECHA FINAL RANGO: "+ sdf.format(filtroNumerarBean.getFechaInicioHasta()));
-		if(!sdf.format(numerarBeanTanques.getFechaRegUltimo()).equals(sdf.format(filtroNumerarBean.getFechaInicioHasta()))){
+		LOGGER.info("FECHA FINAL NIVEL: " + sdf.format(numerarBeanTanques.getFechaRegUltimo()));
+		LOGGER.info("FECHA FINAL RANGO: " + sdf.format(filtroNumerarBean.getFechaInicioHasta()));
+		if (!sdf.format(numerarBeanTanques.getFechaRegUltimo())
+				.equals(sdf.format(filtroNumerarBean.getFechaInicioHasta()))) {
 			hayNivelFinal = true;
 			numerarBeanTanques.setUltimoNivelFecha(null);
 			numerarBeanTanques.setFechaRegUltimo(null);
 		}
 		return numerarBeanTanques;
 	}
-	
-	private NumerarBean compruebaSiExisteNivel(FiltroNumerarWrapperBean filtroNumerarBean, NumerarBean numerarBeanTanques, SimpleDateFormat sdf) {
-		LOGGER.info("FECHA INICIAL NIVEL: "+ sdf.format(numerarBeanTanques.getFechaRegPrimer()));
-		LOGGER.info("FECHA INICIAL RANGO: "+ sdf.format(filtroNumerarBean.getFechaInicioDesde()));
-		if(!sdf.format(numerarBeanTanques.getFechaRegPrimer()).equals(sdf.format(filtroNumerarBean.getFechaInicioDesde()))){
+
+	private NumerarBean compruebaSiExisteNivel(FiltroNumerarWrapperBean filtroNumerarBean,
+			NumerarBean numerarBeanTanques, SimpleDateFormat sdf) {
+		LOGGER.info("FECHA INICIAL NIVEL: " + sdf.format(numerarBeanTanques.getFechaRegPrimer()));
+		LOGGER.info("FECHA INICIAL RANGO: " + sdf.format(filtroNumerarBean.getFechaInicioDesde()));
+		if (!sdf.format(numerarBeanTanques.getFechaRegPrimer())
+				.equals(sdf.format(filtroNumerarBean.getFechaInicioDesde()))) {
 			numerarBeanTanques.setPrimerNivelFecha(null);
 			numerarBeanTanques.setFechaRegPrimer(null);
 		}
 		return numerarBeanTanques;
 	}
-	
-	private NumerarBean volumenDesc(List<DescargaNodoConsolaBean> lista, NumerarBean numerarBean){
+
+	private NumerarBean volumenDesc(List<DescargaNodoConsolaBean> lista, NumerarBean numerarBean) {
 		int sumVolumen = 0;
 		int numOp = 0;
-		for(DescargaNodoConsolaBean desc : lista){
-			desc.setDifLitros(desc.getVolumenNetoFin().intValue()-desc.getVolumenNetoInicio().intValue());
+		for (DescargaNodoConsolaBean desc : lista) {
+			desc.setDifLitros(desc.getVolumenNetoFin().intValue() - desc.getVolumenNetoInicio().intValue());
 			sumVolumen += desc.getDifLitros();
-			if(desc.getOpEspecial() == 1){
+			if (desc.getOpEspecial() == 1) {
 				numOp += 1;
 			}
 		}
@@ -1283,52 +1357,56 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		numerarBean.setNumOp(numOp);
 		return numerarBean;
 	}
-	
+
 	private NumerarBean verificacionLista(NumerarBean numerarBeanTanques, List<DescargaNodoConsolaBean> lista) {
-		if(lista.isEmpty()){
+		if (lista.isEmpty()) {
 			numerarBeanTanques.setNumDescargas(0);
 			numerarBeanTanques.setVolumenInicial(0);
 			numerarBeanTanques.setVolumenFinal(0);
 			numerarBeanTanques.setNumOp(0);
-		}else{
+		} else {
 			numerarBeanTanques.setNumDescargas(lista.size());
 			numerarBeanTanques.setVolumenInicial(lista.get(0).getVolumenNetoInicio().intValue());
-			numerarBeanTanques.setVolumenFinal(lista.get(lista.size()-1).getVolumenNetoFin().intValue());
+			numerarBeanTanques.setVolumenFinal(lista.get(lista.size() - 1).getVolumenNetoFin().intValue());
 		}
 		return numerarBeanTanques;
 	}
-	
-	private boolean compartenMismoDia(Date fecha1, Date fecha2) {
-        LocalDate localDate1 = fecha1.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate localDate2 = fecha2.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-        return (localDate1.getDayOfMonth() == localDate2.getDayOfMonth()) &&
-               (localDate1.getMonth() == localDate2.getMonth()) &&
-               (localDate1.getYear() == localDate2.getYear());
-    }
-	
-	private Double obtenerLitrosDescargaNodoNoProcesados(List<DescargaNodoConsolaBean> listaDescargasNodosNoProcesada ,Double litrosDescargaNodoNoProcesados, Date fechaInicioDesde) {
-		
-		for(DescargaNodoConsolaBean descargaNodoNoProcesada: listaDescargasNodosNoProcesada) {
-			
-			if(compartenMismoDia(descargaNodoNoProcesada.getFechaFinDescarga(),fechaInicioDesde)) {
-			
-				litrosDescargaNodoNoProcesados+=(descargaNodoNoProcesada.getVolumenNetoFin()-descargaNodoNoProcesada.getVolumenNetoInicio());	
+	private boolean compartenMismoDia(Date fecha1, Date fecha2) {
+		LocalDate localDate1 = fecha1.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		LocalDate localDate2 = fecha2.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+		return (localDate1.getDayOfMonth() == localDate2.getDayOfMonth()) &&
+				(localDate1.getMonth() == localDate2.getMonth()) &&
+				(localDate1.getYear() == localDate2.getYear());
+	}
+
+	private Double obtenerLitrosDescargaNodoNoProcesados(List<DescargaNodoConsolaBean> listaDescargasNodosNoProcesada,
+			Double litrosDescargaNodoNoProcesados, Date fechaInicioDesde) {
+
+		for (DescargaNodoConsolaBean descargaNodoNoProcesada : listaDescargasNodosNoProcesada) {
+
+			if (compartenMismoDia(descargaNodoNoProcesada.getFechaFinDescarga(), fechaInicioDesde)) {
+
+				litrosDescargaNodoNoProcesados += (descargaNodoNoProcesada.getVolumenNetoFin()
+						- descargaNodoNoProcesada.getVolumenNetoInicio());
 			}
 		}
-		
+
 		return litrosDescargaNodoNoProcesados;
 	}
-	
-	private Float obtenerLitrosSuministroNodoNoProcesados(List<SuministroNodoCabezalBean> listaSuministrosNodoNoProcesados ,Float litrosSuministroNodoNoProcesados, Date fechaInicioDesde) {
-		
-		for(SuministroNodoCabezalBean suministroNodoNoProcesado:listaSuministrosNodoNoProcesados) {
-			
-			if(compartenMismoDia(suministroNodoNoProcesado.getFechaFinSuministro(),fechaInicioDesde)) {
-				litrosSuministroNodoNoProcesados+=suministroNodoNoProcesado.getLitrosTemp15();
+
+	private Float obtenerLitrosSuministroNodoNoProcesados(
+			List<SuministroNodoCabezalBean> listaSuministrosNodoNoProcesados, Float litrosSuministroNodoNoProcesados,
+			Date fechaInicioDesde) {
+
+		for (SuministroNodoCabezalBean suministroNodoNoProcesado : listaSuministrosNodoNoProcesados) {
+
+			if (compartenMismoDia(suministroNodoNoProcesado.getFechaFinSuministro(), fechaInicioDesde)) {
+				litrosSuministroNodoNoProcesados += suministroNodoNoProcesado.getLitrosTemp15();
 			}
 		}
-		
+
 		return litrosSuministroNodoNoProcesados;
 	}
 }
