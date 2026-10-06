@@ -336,7 +336,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	}
 
 	/**
-	 * Cabecera de la tabla de Litros reguistrados Ayer.
+	 * Cabecera de la tabla de Litros registrados Ayer.
 	 * @param resultStringBuilder
 	 */
 	private void cabeceraTablaLitrosMovidos(StringBuilder resultStringBuilder){
@@ -363,13 +363,13 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	}
 
 	/**
-	 * Cabecera de la tabla de Litros reguistrados desde CUB.
+	 * Cabecera de la tabla de Litros registrados desde CUB.
 	 * @param resultStringBuilder
 	 */
 
 	private void cabeceraTablaLitrosMovidosCUB(StringBuilder resultStringBuilder){
 
-		resultStringBuilder.append(creacionTabla("Litros reguistrados desde CUB","NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
+		resultStringBuilder.append(creacionTabla("Litros registrados desde CUB","NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
 
 		Map<String,String> columnas = new LinkedHashMap<>();
 
