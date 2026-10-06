@@ -152,7 +152,6 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		createBodySaltosDASMail(listaNumDAS, resultStringBuilder);
 		createBodySinMovMail(listaNodosSinMov, resultStringBuilder);
 		createBodyControlMovMail(resultStringBuilder);
-		resultStringBuilder.append(CLOSE_HTML_BODY);
 
 		LOGGER.info("[crearInformeSumPerdidos] enviarCorreo {} ",resultStringBuilder.toString());
 		
@@ -257,7 +256,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 			resultStringBuilder.append(CLOSE_UL);
 		}
 		
-		LOGGER.info("[createBodySinMovMail] INICIO");
+		LOGGER.info("[createBodySinMovMail] FIN");
 	}
 
 
@@ -266,17 +265,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	 * @param resultStringBuilder
 	 */
 	private void createBodyControlMovMail(StringBuilder resultStringBuilder) {
-		LOGGER.info("[createBodyControlMovMail] INICIO");
-
-		cabecera(resultStringBuilder);
-
-		cuerpo(resultStringBuilder);
-
-		pie(resultStringBuilder);
-
-		LOGGER.info("[createBodyControlMovMail] BodyHtml: {}", resultStringBuilder);
-
-		LOGGER.info("[createBodyControlMovMail] FIN");
+		createBodyControlMovMail(resultStringBuilder, null);
 	}
 
 	/**
@@ -289,25 +278,37 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 
 
 		List<FilaControl> filas = calcularFilas(idsPuntoSuministroFiltro);
+		crearTablasControl(resultStringBuilder, filas);
+		pie(resultStringBuilder);
 
+		LOGGER.info("[createBodyControlMovMail] FIN FILTRADO");
+	}
+
+	/**
+	 * Pinta las tablas de control a partir de las filas ya calculadas.
+	 * Las tablas CUB solo se pintan si algún punto tiene CUB.
+	 * @param resultStringBuilder
+	 * @param filas
+	 */
+	void crearTablasControl(StringBuilder resultStringBuilder, List<FilaControl> filas) {
 		cabeceraTablaTotalizadores(resultStringBuilder);
 		cuerpoTablaTotalizadores(resultStringBuilder, filas);
 
 		cabeceraTablaLitrosMovidos(resultStringBuilder);
 		cuerpoTablaLitrosMovidos(resultStringBuilder, filas);
 
-		cabeceraTablaLitrosMovidosCUB(resultStringBuilder);
-		cuerpoTablaLitrosMovidosCUB(resultStringBuilder, filas);
+		if (hayCub(filas)) {
+			cabeceraTablaLitrosMovidosCUB(resultStringBuilder);
+			cuerpoTablaLitrosMovidosCUB(resultStringBuilder, filas);
+		}
 
 		cabeceraTablaMermasExcesos(resultStringBuilder);
 		cuerpoTablaMermasExcesos(resultStringBuilder, filas);
 
-		cabeceraTablaMermasExcesosCUB(resultStringBuilder);
-		cuerpoTablaMermasExcesosCUB(resultStringBuilder, filas);
-		
-		pie(resultStringBuilder);
-
-		LOGGER.info("[createBodyControlMovMail] FIN FILTRADO");
+		if (hayCub(filas)) {
+			cabeceraTablaMermasExcesosCUB(resultStringBuilder);
+			cuerpoTablaMermasExcesosCUB(resultStringBuilder, filas);
+		}
 	}
 
 	/**
@@ -330,7 +331,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		columnas.put("Dif TOT", OPEN_TH_STYLEAmarillo);
 		columnas.put("Dif TOT vs SUM", OPEN_TH_STYLEAmarillo);
 
-		crearFilas(resultStringBuilder, columnas);
+		crearCabeceras(resultStringBuilder, columnas);
 
 	}
 
@@ -349,15 +350,16 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		columnas.put("NumSUMCab",OPEN_TH_STYLE);
 		columnas.put("NumDES",OPEN_TH_STYLE);
 		columnas.put("NumDESCon",OPEN_TH_STYLE);
-		columnas.put("",OPEN_TH_STYLE);
 		columnas.put("NT_F",OPEN_TH_STYLE);
 		columnas.put("NT_I",OPEN_TH_STYLE);
 		columnas.put("TL_D",OPEN_TH_STYLE);
-		columnas.put("TL_S_Por_Procesar",OPEN_TH_STYLE);
+		columnas.put("TL_D_Por_Procesar",OPEN_TH_STYLE);
+		columnas.put("TL_S",OPEN_TH_STYLE);
 		columnas.put("TL_S_Por_Procesar",OPEN_TH_STYLE);
 		columnas.put("Diferencia de litros",OPEN_TH_STYLEAmarillo);
+		columnas.put("AVG",OPEN_TH_STYLEAmarillo);
 
-		crearFilas(resultStringBuilder, columnas);
+		crearCabeceras(resultStringBuilder, columnas);
 	}
 
 	/**
@@ -372,19 +374,16 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		Map<String,String> columnas = new LinkedHashMap<>();
 
 		columnas.put("Punto de Suministro",OPEN_TH_STYLE);
-		columnas.put("NumSUM",OPEN_TH_STYLE);
-		columnas.put("NumSUMCab",OPEN_TH_STYLE);
-		columnas.put("NumDES",OPEN_TH_STYLE);
-		columnas.put("NumDESCon",OPEN_TH_STYLE);
 		columnas.put("NT_F",OPEN_TH_STYLE);
 		columnas.put("NT_I",OPEN_TH_STYLE);
 		columnas.put("TL_D",OPEN_TH_STYLE);
+		columnas.put("TL_D_Por_Procesar",OPEN_TH_STYLE);
 		columnas.put("TL_S",OPEN_TH_STYLE);
 		columnas.put("TL_S_Por_Procesar",OPEN_TH_STYLE);
 		columnas.put("Diferencia de litros",OPEN_TH_STYLEAmarillo);
 		columnas.put("AVG",OPEN_TH_STYLEAmarillo);
 		
-		crearFilas(resultStringBuilder, columnas);
+		crearCabeceras(resultStringBuilder, columnas);
 	}
 
 	/**
@@ -395,7 +394,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	private void cabeceraTablaMermasExcesos(StringBuilder resultStringBuilder){
 
 		resultStringBuilder.append(creacionTabla("Mermas - Excesos","NT_F - NT_I = Dif litros | ET Fin -  ET Ini = Dif ET | Dif litros - Dif ET = Mermas o Excesos "));
-		crearFilas(resultStringBuilder, cabecerasMermas());
+		crearCabeceras(resultStringBuilder, cabecerasMermas());
 		
 	}
 
@@ -405,7 +404,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	private void cabeceraTablaMermasExcesosCUB(StringBuilder resultStringBuilder){
 		
 		resultStringBuilder.append(creacionTabla("Mermas - Excesos desde CUB",""));
-		crearFilas(resultStringBuilder, cabecerasMermas());
+		crearCabeceras(resultStringBuilder, cabecerasMermas());
 
 	}
 
@@ -423,7 +422,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		return c;
 	}
 
-	private void crearFilas(StringBuilder sb,
+	private void crearCabeceras(StringBuilder sb,
                             Map<String, String> columnas) {
 
 		for (Map.Entry<String, String> columna : columnas.entrySet()) {
@@ -431,6 +430,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 			.append(columna.getKey())
 			.append(CLOSE_TH);
 		}
+		sb.append(CLOSE_TR);
 	}
 	
 	/**
@@ -523,11 +523,6 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		cerrarTabla(sb);
 	}
 	
-	private void cuerpo(StringBuilder resultStringBuilder) {
-		cuerpo(resultStringBuilder, null);
-	}
-
-	//	private void cuerpo(StringBuilder resultStringBuilder, Set<Integer> idsPuntoSuministroFiltro) {
 	private List<FilaControl> calcularFilas(Set<Integer> idsPuntoSuministroFiltro) {
 		List<FilaControl> filas = new ArrayList<>();
 		List<PuntoSuministroBean> listaPuntosSuministro = iGestorPuntoSuministro.consultarPuntosSuministro();
@@ -786,21 +781,18 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 				+ "<i>* TL_D_Por_Procesar No tienen que ser los datos del albarán.</i><br>"
 				+ "<br></pre><br>");
 
-		resultStringBuilder.append(CLOSE_UL);
-		resultStringBuilder.append(CLOSE_LI);
 		resultStringBuilder.append(CLOSE_HTML_BODY);
 	}
 
 	private void createBodySaltosDASMail(List<SuministroBean> listaNumDAS,
 									  StringBuilder resultStringBuilder) {
 		LOGGER.info("[createBodySaltosDASMail] INICIO");
-		resultStringBuilder.append(OPEN_HTML_BODY);
 		resultStringBuilder.append("<p><b>Documentos de Suministro con Posibles Saltos de Numeración: </b></p>");
 
 		// Obtener los puntos con salto de numeracion
 		Map<String, List<SuministroBean>> listaSumPuntosDASConSaltos = obtenerPuntosDASConSalto(listaNumDAS);
 
-		if (listaSumPuntosDASConSaltos != null & !listaSumPuntosDASConSaltos.isEmpty()) {
+		if (listaSumPuntosDASConSaltos != null && !listaSumPuntosDASConSaltos.isEmpty()) {
 			for (Map.Entry<String, List<SuministroBean>> entry : listaSumPuntosDASConSaltos.entrySet()) {
 				String punto = entry.getKey();
 				List<SuministroBean> suministros = entry.getValue();
@@ -828,7 +820,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 					.append(CLOSE_UL);
 		}
 
-		LOGGER.info("[createBodySaltosDASMail] INICIO");
+		LOGGER.info("[createBodySaltosDASMail] FIN");
 	}
 
 	private String obtenerError(Integer idSuministro){
@@ -1041,7 +1033,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 				.append(CLOSE_UL);
 		}
 
-		LOGGER.info("[createBodySaltosMail] INICIO");		
+		LOGGER.info("[createBodySaltosMail] FIN");		
 	}
 
 	private void enviarCorreo(List<PersonalBean> listaPersonal, String cuerpoMensaje) {
@@ -1103,7 +1095,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	}
 
 	private List<MovimientoBean> comprobarListaSumWebOAuto(List<MovimientoBean> listaMovimientos, SuministroBean sum, List<SuministroSurtidorBean> listSumSurtidores) {
-		if(!listSumSurtidores.isEmpty() && listSumSurtidores != null) {
+		if(listSumSurtidores != null && !listSumSurtidores.isEmpty()) {
 			for (SuministroSurtidorBean sumSurt : listSumSurtidores) {
 				MovimientoBean mov = new MovimientoBean();
 				mov.setFechaInicio(sum.getFechaInicio());
@@ -1138,7 +1130,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	}
 	
 	private List<MovimientoBean> comprobarListaDescWebOAuto(List<MovimientoBean> listaMovimientos, DescargaBean des, List<DescargaTanqueBean> listaDesTanques) {
-		if(!listaDesTanques.isEmpty() && listaDesTanques != null) {
+		if(listaDesTanques != null && !listaDesTanques.isEmpty()) {
 			for (DescargaTanqueBean desTanq : listaDesTanques) {
 				MovimientoBean mov = new MovimientoBean();
 				mov.setFechaInicio(des.getFechaInicioDescarga());

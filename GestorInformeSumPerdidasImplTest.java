@@ -1,3 +1,5 @@
+package es.adif.tlg.negocio.impl;
+
 import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
@@ -32,7 +34,7 @@ public class GestorInformeSumPerdidasImplTest {
 
         GestorInformeSumPerdidasImpl gestor = new GestorInformeSumPerdidasImpl();   // sin Spring: solo usamos el pintado
         StringBuilder sb = new StringBuilder("<html><body>");
-        gestor.crearFilas(sb, filas);
+        gestor.crearTablasControl(sb, filas);
         sb.append("</body></html>");
 
         Path salida = Paths.get("target", "informe-control.html");
@@ -44,6 +46,7 @@ public class GestorInformeSumPerdidasImplTest {
         assertTrue(html.contains("Litros movidos AYER"));
         assertTrue(html.contains("Litros movidos desde CUB"));
         assertTrue(html.contains("Mermas - Excesos"));
+        assertTrue(html.contains("Mermas - Excesos desde CUB"));
         assertTrue(html.contains("#f8d7da"));   // hay alguna fila en rojo
     }
 

@@ -1,16 +1,20 @@
+package es.adif.tlg.bean;
+
+import java.util.Date;
+
 public class FilaControl {
-    String nombre;
-    int ntF, ntI;
-    int numSum, numSumCab, numDes, numDesCon;
-    double tlD, tlDPP, tlS, tlSPP;
-    double difLitros;                    // CON signo: NT_F - (NT_I + TL_D + TL_D_PP - TL_S - TL_S_PP)
-    double totIni, totFin;
-    double etIni, etFin;
+    public String nombre;
+    public int ntF, ntI;
+    public int numSum, numSumCab, numDes, numDesCon;
+    public double tlD, tlDPP, tlS, tlSPP;
+    public double difLitros;                    // CON signo: NT_F - (NT_I + TL_D + TL_D_PP - TL_S - TL_S_PP)
+    public double totIni, totFin;
+    public double etIni, etFin;
     // Desde CUB (fechaCub == null si no hay CUB)
-    Date fechaCub;
-    int ntICub;
-    double etIniCub;
-    double tlDCub, tlDPPCub, tlSCub, tlSPPCub, difCub;
+    public Date fechaCub;
+    public int ntICub;
+    public double etIniCub;
+    public double tlDCub, tlDPPCub, tlSCub, tlSPPCub, difCub;
 
     public String getNombre() {
     return nombre;
