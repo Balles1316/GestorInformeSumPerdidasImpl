@@ -19,7 +19,6 @@ public class GestorInformeSumPerdidasImplTest {
     @Test
     public void generaHtmlDeLasTablas() throws Exception {
         List<FilaControl> filas = new ArrayList<>();
-        // Datos del Excel (los totalizadores y ET están inventados)
         filas.add(fila("Abroñigal", 22851, 16484, 9912, 3573, 28, 1000000, 1003573, 16480, 22826));
         filas.add(fila("Monforte", 71753, 46187, 31806, 6102, -138, 2000000, 2006107, 46100, 71700)); // Dif TOT vs SUM = 5 -> rojo
         FilaControl salamanca = fila("Salamanca", 78607, 58777, 31791, 10880, -1081, 3000000, 3010880, 58700, 78500); // AVG ~9,9 % -> rojo

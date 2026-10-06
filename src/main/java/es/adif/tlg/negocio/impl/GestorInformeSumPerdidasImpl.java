@@ -49,8 +49,8 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	private static final String OPEN_UL = "<ul>";
 	private static final String	CLOSE_UL = "</ul>";
 	private static final String OPEN_TH_STYLE = "<th style=\"border: 1px solid black ;background-color: #f2f2f2;\">";
-	private static final String OPEN_TH_STYLEAmarillo = "<th style=\"border: 1px solid black ;background-color: #FFEE8C;\">";
-	private static final String OPEN_TH_STYLENaranja = "<th style=\"border: 1px solid black ;background-color: #ffe5b4;\">";
+	private static final String OPEN_TH_STYLEYellow = "<th style=\"border: 1px solid black ;background-color: #FFEE8C;\">";
+	private static final String OPEN_TH_STYLEOrange = "<th style=\"border: 1px solid black ;background-color: #ffe5b4;\">";
 	private static final String CLOSE_TH = "</th>";
 	private static final String OPEN_TR = "<tr>";			
 	private static final String CLOSE_TR = "</tr>";
@@ -61,7 +61,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	private static final String OPEN_TABLE = "<table style=\"border: 1px solid black;\">";
 	private static final String CLOSE_TABLE = "</table>";
 	private static final String COLOR = "_color";
-	private static final String COLOR_ROJO     = "#f8d7da";
+	private static final String COLOR_Red     = "#f8d7da";
 	@Autowired
 	private IGestorPersonal personalGestor;
 	
@@ -325,23 +325,23 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		columnas.put("Punto de Suministro", OPEN_TH_STYLE);
 		columnas.put("TL_S", OPEN_TH_STYLE);
 		columnas.put("TL_S_Procesar", OPEN_TH_STYLE);
-		columnas.put("SUM TL_S", OPEN_TH_STYLEAmarillo);
+		columnas.put("SUM TL_S", OPEN_TH_STYLEYellow);
 		columnas.put("TOT Ini", OPEN_TH_STYLE);
 		columnas.put("TOT Fin", OPEN_TH_STYLE);
-		columnas.put("Dif TOT", OPEN_TH_STYLEAmarillo);
-		columnas.put("Dif TOT vs SUM", OPEN_TH_STYLEAmarillo);
+		columnas.put("Dif TOT", OPEN_TH_STYLEYellow);
+		columnas.put("Dif TOT vs SUM", OPEN_TH_STYLEOrange);
 
 		crearCabeceras(resultStringBuilder, columnas);
 
 	}
 
 	/**
-	 * Cabecera de la tabla de Litros movidos Ayer.
+	 * Cabecera de la tabla de Litros reguistrados Ayer.
 	 * @param resultStringBuilder
 	 */
 	private void cabeceraTablaLitrosMovidos(StringBuilder resultStringBuilder){
 
-		resultStringBuilder.append(creacionTabla("Litros movidos AYER","NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
+		resultStringBuilder.append(creacionTabla("Litros Registrados","NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
 
 		Map<String,String> columnas = new LinkedHashMap<>();
 
@@ -356,20 +356,20 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		columnas.put("TL_D_Por_Procesar",OPEN_TH_STYLE);
 		columnas.put("TL_S",OPEN_TH_STYLE);
 		columnas.put("TL_S_Por_Procesar",OPEN_TH_STYLE);
-		columnas.put("Diferencia de litros",OPEN_TH_STYLEAmarillo);
-		columnas.put("AVG",OPEN_TH_STYLEAmarillo);
+		columnas.put("Diferencia de litros",OPEN_TH_STYLEYellow);
+		columnas.put("AVG",OPEN_TH_STYLEOrange);
 
 		crearCabeceras(resultStringBuilder, columnas);
 	}
 
 	/**
-	 * Cabecera de la tabla de Litros movidos desde CUB.
+	 * Cabecera de la tabla de Litros reguistrados desde CUB.
 	 * @param resultStringBuilder
 	 */
 
 	private void cabeceraTablaLitrosMovidosCUB(StringBuilder resultStringBuilder){
 
-		resultStringBuilder.append(creacionTabla("Litros movidos desde CUB","NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
+		resultStringBuilder.append(creacionTabla("Litros reguistrados desde CUB","NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
 
 		Map<String,String> columnas = new LinkedHashMap<>();
 
@@ -380,8 +380,8 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		columnas.put("TL_D_Por_Procesar",OPEN_TH_STYLE);
 		columnas.put("TL_S",OPEN_TH_STYLE);
 		columnas.put("TL_S_Por_Procesar",OPEN_TH_STYLE);
-		columnas.put("Diferencia de litros",OPEN_TH_STYLEAmarillo);
-		columnas.put("AVG",OPEN_TH_STYLEAmarillo);
+		columnas.put("Diferencia de litros",OPEN_TH_STYLEYellow);
+		columnas.put("AVG",OPEN_TH_STYLEOrange);
 		
 		crearCabeceras(resultStringBuilder, columnas);
 	}
@@ -393,7 +393,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 
 	private void cabeceraTablaMermasExcesos(StringBuilder resultStringBuilder){
 
-		resultStringBuilder.append(creacionTabla("Mermas - Excesos","NT_F - NT_I = Dif litros | ET Fin -  ET Ini = Dif ET | Dif litros - Dif ET = Mermas o Excesos "));
+		resultStringBuilder.append(creacionTabla("Mermas o Excesos","NT_F - NT_I = Dif litros | ET Fin -  ET Ini = Dif ET | Dif litros - Dif ET = Mermas o Excesos "));
 		crearCabeceras(resultStringBuilder, cabecerasMermas());
 		
 	}
@@ -403,7 +403,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	 */
 	private void cabeceraTablaMermasExcesosCUB(StringBuilder resultStringBuilder){
 		
-		resultStringBuilder.append(creacionTabla("Mermas - Excesos desde CUB",""));
+		resultStringBuilder.append(creacionTabla("Mermas o Excesos desde CUB",""));
 		crearCabeceras(resultStringBuilder, cabecerasMermas());
 
 	}
@@ -414,11 +414,11 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		c.put("Punto de Suministro", OPEN_TH_STYLE);
 		c.put("NT_F", OPEN_TH_STYLE);
 		c.put("NT_I", OPEN_TH_STYLE);
-		c.put("Dif litros", OPEN_TH_STYLEAmarillo);
+		c.put("Dif litros", OPEN_TH_STYLEYellow);
 		c.put("ET Fin", OPEN_TH_STYLE);
 		c.put("ET Ini", OPEN_TH_STYLE);
-		c.put("Dif ET", OPEN_TH_STYLEAmarillo);
-		c.put("Mermas o Excesos", OPEN_TH_STYLEAmarillo);
+		c.put("Dif ET", OPEN_TH_STYLEYellow);
+		c.put("Mermas o Excesos", OPEN_TH_STYLEOrange);
 		return c;
 	}
 
@@ -437,19 +437,26 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	* Cuerpo de la tabla de Totalizadores.
 	*/
 	private void cuerpoTablaTotalizadores(StringBuilder sb, List<FilaControl> filas) {
-		NumberFormat nf = formatoNumero();
-		for (FilaControl f : filas) {
-			double sumTlS = f.tlS + f.tlSPP;
-			double difTot = f.totFin - f.totIni;
-			double difVsSum = difTot - sumTlS;
+    NumberFormat nf = formatoNumero();
 
-			String color = Math.abs(difVsSum) > 3 ? COLOR_ROJO : null;   // regla del Excel
+    for (FilaControl f : filas) {
+        double sumTlS = f.tlS + f.tlSPP;
+        double difTot = f.totFin - f.totIni;
+        double difVsSum = difTot - sumTlS;
 
-			fila(sb, color, f.nombre, nf.format(f.tlS), nf.format(f.tlSPP), nf.format(sumTlS),
-					nf.format(f.totIni), nf.format(f.totFin), nf.format(difTot), nf.format(difVsSum));
+      	String difVsSumTexto = nf.format(difVsSum);
+
+		if (Math.abs(difVsSum) > 3) {
+		difVsSumTexto = "<span style='color:red;font-weight:bold;'>"
+		+ difVsSumTexto
+		+ "</span>";
 		}
-		cerrarTabla(sb);
-	}
+
+        fila(sb, null, f.nombre,nf.format(f.tlS),nf.format(f.tlSPP),nf.format(sumTlS),nf.format(f.totIni),nf.format(f.totFin),nf.format(difTot), difVsSumTexto);
+    }
+
+    cerrarTabla(sb);
+}
 
 	/**
 	* Cuerpo de la tabla de Litros movidos Ayer.
@@ -460,12 +467,15 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		for (FilaControl f : filas) {
 			double avg = ratio(f.difLitros, f.tlS + f.tlSPP);
 
-			String color = avg > 0.05 ? COLOR_ROJO : null;               // regla del Excel: AVG > 5 %
+			String avgTexto = pct.format(avg);
+			if (avg > 0.05) {
+			avgTexto = "<span style='color:red;font-weight:bold;'>" + avgTexto + "</span>";
+			}
+		 // regla del Excel: AVG > 5 %
 
-			fila(sb, color, f.nombre, String.valueOf(f.numSum), String.valueOf(f.numSumCab),
-					String.valueOf(f.numDes), String.valueOf(f.numDesCon),
-					nf.format(f.ntF), nf.format(f.ntI), nf.format(f.tlD), nf.format(f.tlDPP),
-					nf.format(f.tlS), nf.format(f.tlSPP), nf.format(f.difLitros), pct.format(avg));
+			fila(sb, null,f.nombre, String.valueOf(f.numSum),String.valueOf(f.numSumCab),
+			String.valueOf(f.numDes),String.valueOf(f.numDesCon),nf.format(f.ntF),nf.format(f.ntI),nf.format(f.tlD),nf.format(f.tlDPP), nf.format(f.tlS),
+        	nf.format(f.tlSPP), nf.format(f.difLitros),avgTexto);
 		}
 		cerrarTabla(sb);
 	}
@@ -480,12 +490,14 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 			if (f.fechaCub == null) {
 				continue;                                                  // solo puntos con CUB
 			}
-			double avg = ratio(f.difCub, f.tlSCub + f.tlSPPCub);
-			String color = avg > 0.05 ? COLOR_ROJO : null;
-
-			fila(sb, color, f.nombre, nf.format(f.ntF), nf.format(f.ntICub),
+		double avg = ratio(f.difCub, f.tlSCub + f.tlSPPCub);
+		String avgTexto = pct.format(avg);
+		if (avg > 0.05) {
+		avgTexto = "<span style='color:red;font-weight:bold;'>" + avgTexto + "</span>";
+		}
+			fila(sb, null, f.nombre, nf.format(f.ntF), nf.format(f.ntICub),
 					nf.format(f.tlDCub), nf.format(f.tlDPPCub), nf.format(f.tlSCub), nf.format(f.tlSPPCub),
-					nf.format(f.difCub), pct.format(avg));
+					nf.format(f.difCub), avgTexto);
 		}
 		cerrarTabla(sb);
 	}
@@ -498,7 +510,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		for (FilaControl f : filas) {
 			String color = null;                                           // regla pendiente de decidir
 
-			fila(sb, color, f.nombre, nf.format(f.ntF), nf.format(f.ntI), nf.format(f.ntF - f.ntI),
+			fila(sb, null, f.nombre, nf.format(f.ntF), nf.format(f.ntI), nf.format(f.ntF - f.ntI),
 					nf.format(f.etFin), nf.format(f.etIni), nf.format(f.etFin - f.etIni),
 					nf.format(f.ntF - f.etFin));
 		}
@@ -733,9 +745,8 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	 *
 	 * @param titulo De la tabla
 	 * @param formula utilizada ejemplo NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar
-	 * @return
+	 * @return 
 	 */
-	// Primera columna a la izquierda, el resto a la derecha. Las cabeceras de "destacadas" van en amarillo.
 	private String creacionTabla(String titulo, String formula) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<p><b>Comprobación diaria ").append(titulo).append(": </b></p>");
