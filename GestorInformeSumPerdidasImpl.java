@@ -127,6 +127,10 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	/* LOGICA 	                                                               */
 	/* ======================================================================= */
 	
+
+	/**
+	* Genera y envía el informe diario de comprobaciones y posibles pérdidas.
+	*/
 	@Override
 	public void crearInformeSumPerdidos() throws Exception {
 		LOGGER.info("[crearInformeSumPerdidos] INICIO ");
@@ -157,8 +161,9 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		LOGGER.info("[crearInformeSumPerdidos] FIN ");
 	}
 
+	
 	/**
-	 * Metodo utilizado para la creacion del bloque de Resumen del correo
+	 * Construye el bloque HTML de resumen filtrado por puntos de suministro.
 	 * @param idsPuntoSuministroFiltro
 	 * @return
 	 */
@@ -183,7 +188,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	}
 
 	/**
-	 *
+	 *Elimina las etiquetas html y body externas del contenido.
 	 * @param html
 	 * @return
 	 */
@@ -192,7 +197,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	}
 
 	/**
-	 *
+	 *Filtra una lista de nodos por los puntos de suministro indicados.
 	 * @param lista
 	 * @param idsPuntoSuministroFiltro
 	 * @return
@@ -212,7 +217,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	}
 
 	/**
-	 *
+	 *Filtra una lista de suministros por los puntos de suministro indicados.
 	 * @param lista
 	 * @param idsPuntoSuministroFiltro
 	 * @return
@@ -231,7 +236,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	}
 
 	/**
-	 *
+	 *Genera el bloque HTML de surtidores sin movimiento.
 	 * @param listaNodosSinMov
 	 * @param resultStringBuilder
 	 */
@@ -257,7 +262,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 
 
 	/**
-	 *
+	 *Genera las tablas de control completas para el correo.
 	 * @param resultStringBuilder
 	 */
 	private void createBodyControlMovMail(StringBuilder resultStringBuilder) {
@@ -275,38 +280,44 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	}
 
 	/**
-	 *
+	 *Genera las tablas de control filtradas por punto de suministro.
 	 * @param resultStringBuilder
 	 * @param idsPuntoSuministroFiltro
 	 */
 	private void createBodyControlMovMail(StringBuilder resultStringBuilder, Set<Integer> idsPuntoSuministroFiltro) {
 		LOGGER.info("[createBodyControlMovMail] INICIO FILTRADO");
 
-		cabeceraTablaUno(resultStringBuilder);
-		cuerpoTablaUno(resultStringBuilder, idsPuntoSuministroFiltro);
 
-		cabeceraTablaDos(resultStringBuilder);
-		cuerpoTablaDos(resultStringBuilder, idsPuntoSuministroFiltro);
+		List<FilaControl> filas = calcularFilas(idsPuntoSuministroFiltro);
 
-		cabeceraTablaTres(resultStringBuilder);
-		cuerpoTablaTres(resultStringBuilder, idsPuntoSuministroFiltro);
+		cabeceraTablaTotalizadores(resultStringBuilder);
+		cuerpoTablaTotalizadores(resultStringBuilder, filas);
 
-		cabeceraTablaCuatro(resultStringBuilder);
-		cuerpoTablaCuatro(resultStringBuilder, idsPuntoSuministroFiltro);
+		cabeceraTablaLitrosMovidos(resultStringBuilder);
+		cuerpoTablaLitrosMovidos(resultStringBuilder, filas);
 
+		cabeceraTablaLitrosMovidosCUB(resultStringBuilder);
+		cuerpoTablaLitrosMovidosCUB(resultStringBuilder, filas);
+
+		cabeceraTablaMermasExcesos(resultStringBuilder);
+		cuerpoTablaMermasExcesos(resultStringBuilder, filas);
+
+		cabeceraTablaMermasExcesosCUB(resultStringBuilder);
+		cuerpoTablaMermasExcesosCUB(resultStringBuilder, filas);
+		
 		pie(resultStringBuilder);
 
 		LOGGER.info("[createBodyControlMovMail] FIN FILTRADO");
 	}
 
 	/**
-	 * Legacy : Metodo para la contrucion de la cabezera de la mega tabla se sustituye por 4 tablas más explícitas por petición de negocio
+	 * Cabecera de la tabla de Totalizadores.
 	 *
 	 * @param resultStringBuilder HTML con la tabla comprobación diaria de los litros registrados
 	 */
-	private void cabeceraTablaUno(StringBuilder resultStringBuilder){
+	private void cabeceraTablaTotalizadores(StringBuilder resultStringBuilder){
 
-		creacionTabla("Totalizadores","NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar");
+		resultStringBuilder.append(creacionTabla("Totalizadores","NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
 
 		Map<String, String> columnas = new LinkedHashMap<>();
 
@@ -315,154 +326,213 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		columnas.put("TL_S_Procesar", OPEN_TH_STYLE);
 		columnas.put("SUM TL_S", OPEN_TH_STYLEAmarillo);
 		columnas.put("TOT Ini", OPEN_TH_STYLE);
+		columnas.put("TOT Fin", OPEN_TH_STYLE);
 		columnas.put("Dif TOT", OPEN_TH_STYLEAmarillo);
 		columnas.put("Dif TOT vs SUM", OPEN_TH_STYLEAmarillo);
 
-		crearCabeceras(resultStringBuilder, columnas);
+		crearFilas(resultStringBuilder, columnas);
 
 	}
 
-	private void cabeceraTablaDos(StringBuilder resultStringBuilder){
+	/**
+	 * Cabecera de la tabla de Litros movidos Ayer.
+	 * @param resultStringBuilder
+	 */
+	private void cabeceraTablaLitrosMovidos(StringBuilder resultStringBuilder){
 
-		//TODO: CAMBIAR FORMULA
-		creacionTabla("Litros movidos AYER","TODO: CAMBIAR FORMULA");
+		resultStringBuilder.append(creacionTabla("Litros movidos AYER","NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
 
 		Map<String,String> columnas = new LinkedHashMap<>();
 
-		columnas.put(Punto de Suministro,OPEN_TH_STYLE);
+		columnas.put("Punto de Suministro",OPEN_TH_STYLE);
+		columnas.put("NumSUM",OPEN_TH_STYLE);
+		columnas.put("NumSUMCab",OPEN_TH_STYLE);
+		columnas.put("NumDES",OPEN_TH_STYLE);
+		columnas.put("NumDESCon",OPEN_TH_STYLE);
+		columnas.put("",OPEN_TH_STYLE);
+		columnas.put("NT_F",OPEN_TH_STYLE);
+		columnas.put("NT_I",OPEN_TH_STYLE);
+		columnas.put("TL_D",OPEN_TH_STYLE);
+		columnas.put("TL_S_Por_Procesar",OPEN_TH_STYLE);
+		columnas.put("TL_S_Por_Procesar",OPEN_TH_STYLE);
+		columnas.put("Diferencia de litros",OPEN_TH_STYLEAmarillo);
 
-		// Punto de Suministro
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("")
-				.append(CLOSE_TH);
-
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("NumSUM")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("NumSUMCab")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("NumDES")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("NumDESCon")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("NT_F")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("NT_I")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("TL_D")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("TL_S")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("TL_S_Por_Procesar")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLEAmarillo)
-				.append("Diferencia de litros")
-				.append(CLOSE_TH);
+		crearFilas(resultStringBuilder, columnas);
 	}
 
-	private void cabeceraTablaTres(StringBuilder resultStringBuilder){
+	/**
+	 * Cabecera de la tabla de Litros movidos desde CUB.
+	 * @param resultStringBuilder
+	 */
 
-		//TODO: CAMBIAR FORMULA
-		creacionTabla("Mermas y Excesos","TODO: CAMBIAR FORMULA");
+	private void cabeceraTablaLitrosMovidosCUB(StringBuilder resultStringBuilder){
 
-		// Punto de Suministro
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("Punto de Suministro")
-				.append(CLOSE_TH);
+		resultStringBuilder.append(creacionTabla("Litros movidos desde CUB","NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
 
-		resultStringBuilder.append(OPEN_TH_STYLENaranja)
-				.append("NT_F")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("NT_I")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLEAmarillo)
-				.append("Dif litros")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLENaranja)
-				.append("ET Fin")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("ET Ini")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLEAmarillo)
-				.append("Dif ET")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLEAmarillo)
-				.append("Mermas o Excesos")
-				.append(CLOSE_TH);
+		Map<String,String> columnas = new LinkedHashMap<>();
+
+		columnas.put("Punto de Suministro",OPEN_TH_STYLE);
+		columnas.put("NumSUM",OPEN_TH_STYLE);
+		columnas.put("NumSUMCab",OPEN_TH_STYLE);
+		columnas.put("NumDES",OPEN_TH_STYLE);
+		columnas.put("NumDESCon",OPEN_TH_STYLE);
+		columnas.put("NT_F",OPEN_TH_STYLE);
+		columnas.put("NT_I",OPEN_TH_STYLE);
+		columnas.put("TL_D",OPEN_TH_STYLE);
+		columnas.put("TL_S",OPEN_TH_STYLE);
+		columnas.put("TL_S_Por_Procesar",OPEN_TH_STYLE);
+		columnas.put("Diferencia de litros",OPEN_TH_STYLEAmarillo);
+		columnas.put("AVG",OPEN_TH_STYLEAmarillo);
+		
+		crearFilas(resultStringBuilder, columnas);
+	}
+
+	/**
+	 * Cabecera de la tabla de Mermas - Excesos.
+	 * @param resultStringBuilder
+	 */
+
+	private void cabeceraTablaMermasExcesos(StringBuilder resultStringBuilder){
+
+		resultStringBuilder.append(creacionTabla("Mermas - Excesos","NT_F - NT_I = Dif litros | ET Fin -  ET Ini = Dif ET | Dif litros - Dif ET = Mermas o Excesos "));
+		crearFilas(resultStringBuilder, cabecerasMermas());
+		
+	}
+
+	/**
+	 * Cabecera de la tabla de Mermas - Excesos desde CUB.
+	 */
+	private void cabeceraTablaMermasExcesosCUB(StringBuilder resultStringBuilder){
+		
+		resultStringBuilder.append(creacionTabla("Mermas - Excesos desde CUB",""));
+		crearFilas(resultStringBuilder, cabecerasMermas());
 
 	}
 
-	private void cabeceraTablaCuatro(StringBuilder resultStringBuilder){
-
-		//TODO: CAMBIAR FORMULA
-		creacionTabla("Otros","TODO: CAMBIAR FORMULA");
-
-		crearCabeceras(resultStringBuilder,);
-
-		// Punto de Suministro
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("Punto de Suministro")
-				.append(CLOSE_TH);
-
-		resultStringBuilder.append(OPEN_TH_STYLENaranja)
-				.append("NumSUM")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("NumSUMCab")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("NumDES")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("NumDESCon")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append(" ")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("TOT litros SUM a CGD")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("TOT litros SUM no CGD")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("TOT litros DES a CGD")
-				.append(CLOSE_TH);
-		resultStringBuilder.append(OPEN_TH_STYLE)
-				.append("TOT litros DES no CGD")
-				.append(CLOSE_TH);
-
+	// Mermas y Excesos llevan las mismas columnas
+	private Map<String, String> cabecerasMermas() {
+		Map<String, String> c = new LinkedHashMap<>();
+		c.put("Punto de Suministro", OPEN_TH_STYLE);
+		c.put("NT_F", OPEN_TH_STYLE);
+		c.put("NT_I", OPEN_TH_STYLE);
+		c.put("Dif litros", OPEN_TH_STYLEAmarillo);
+		c.put("ET Fin", OPEN_TH_STYLE);
+		c.put("ET Ini", OPEN_TH_STYLE);
+		c.put("Dif ET", OPEN_TH_STYLEAmarillo);
+		c.put("Mermas o Excesos", OPEN_TH_STYLEAmarillo);
+		return c;
 	}
 
-	private void crearCabeceras(StringBuilder sb,
+	private void crearFilas(StringBuilder sb,
                             Map<String, String> columnas) {
 
-    for (Map.Entry<String, String> columna : columnas.entrySet()) {
-        sb.append(columna.getValue())
-          .append(columna.getKey())
-          .append(CLOSE_TH);
-    }
-}
+		for (Map.Entry<String, String> columna : columnas.entrySet()) {
+			sb.append(columna.getValue())
+			.append(columna.getKey())
+			.append(CLOSE_TH);
+		}
+	}
+	
+	/**
+	* Cuerpo de la tabla de Totalizadores.
+	*/
+	private void cuerpoTablaTotalizadores(StringBuilder sb, List<FilaControl> filas) {
+		NumberFormat nf = formatoNumero();
+		for (FilaControl f : filas) {
+			double sumTlS = f.tlS + f.tlSPP;
+			double difTot = f.totFin - f.totIni;
+			double difVsSum = difTot - sumTlS;
 
+			String color = Math.abs(difVsSum) > 3 ? COLOR_ROJO : null;   // regla del Excel
+
+			fila(sb, color, f.nombre, nf.format(f.tlS), nf.format(f.tlSPP), nf.format(sumTlS),
+					nf.format(f.totIni), nf.format(f.totFin), nf.format(difTot), nf.format(difVsSum));
+		}
+		cerrarTabla(sb);
+	}
+
+	/**
+	* Cuerpo de la tabla de Litros movidos Ayer.
+	*/
+	private void cuerpoTablaLitrosMovidos(StringBuilder sb, List<FilaControl> filas) {
+		NumberFormat nf = formatoNumero();
+		NumberFormat pct = formatoPorcentaje();
+		for (FilaControl f : filas) {
+			double avg = ratio(f.difLitros, f.tlS + f.tlSPP);
+
+			String color = avg > 0.05 ? COLOR_ROJO : null;               // regla del Excel: AVG > 5 %
+
+			fila(sb, color, f.nombre, String.valueOf(f.numSum), String.valueOf(f.numSumCab),
+					String.valueOf(f.numDes), String.valueOf(f.numDesCon),
+					nf.format(f.ntF), nf.format(f.ntI), nf.format(f.tlD), nf.format(f.tlDPP),
+					nf.format(f.tlS), nf.format(f.tlSPP), nf.format(f.difLitros), pct.format(avg));
+		}
+		cerrarTabla(sb);
+	}
+
+	/**
+	* Cuerpo de la tabla de Litros movidos desde CUB.
+	*/
+	private void cuerpoTablaLitrosMovidosCUB(StringBuilder sb, List<FilaControl> filas) {
+		NumberFormat nf = formatoNumero();
+		NumberFormat pct = formatoPorcentaje();
+		for (FilaControl f : filas) {
+			if (f.fechaCub == null) {
+				continue;                                                  // solo puntos con CUB
+			}
+			double avg = ratio(f.difCub, f.tlSCub + f.tlSPPCub);
+			String color = avg > 0.05 ? COLOR_ROJO : null;
+
+			fila(sb, color, f.nombre, nf.format(f.ntF), nf.format(f.ntICub),
+					nf.format(f.tlDCub), nf.format(f.tlDPPCub), nf.format(f.tlSCub), nf.format(f.tlSPPCub),
+					nf.format(f.difCub), pct.format(avg));
+		}
+		cerrarTabla(sb);
+	}
+
+	/**
+	* Cuerpo de la tabla de Mermas - Excesos.
+	*/
+	private void cuerpoTablaMermasExcesos(StringBuilder sb, List<FilaControl> filas) {
+		NumberFormat nf = formatoNumero();
+		for (FilaControl f : filas) {
+			String color = null;                                           // regla pendiente de decidir
+
+			fila(sb, color, f.nombre, nf.format(f.ntF), nf.format(f.ntI), nf.format(f.ntF - f.ntI),
+					nf.format(f.etFin), nf.format(f.etIni), nf.format(f.etFin - f.etIni),
+					nf.format(f.ntF - f.etFin));
+		}
+		cerrarTabla(sb);
+	}
+
+	/**
+	* Cuerpo de la tabla de Mermas - Excesos CUB.
+	*/
+	private void cuerpoTablaMermasExcesosCUB(StringBuilder sb, List<FilaControl> filas) {
+		NumberFormat nf = formatoNumero();
+		for (FilaControl f : filas) {
+			if (f.fechaCub == null) {
+				continue;
+			}
+			String color = null;
+
+			fila(sb, color, f.nombre, nf.format(f.ntF), nf.format(f.ntICub), nf.format(f.ntF - f.ntICub),
+					nf.format(f.etFin), nf.format(f.etIniCub), nf.format(f.etFin - f.etIniCub),
+					nf.format(f.ntF - f.etFin));
+		}
+		cerrarTabla(sb);
+	}
+	
 	private void cuerpo(StringBuilder resultStringBuilder) {
 		cuerpo(resultStringBuilder, null);
 	}
 
 	//	private void cuerpo(StringBuilder resultStringBuilder, Set<Integer> idsPuntoSuministroFiltro) {
-	private void cuerpo(StringBuilder resultStringBuilder, Set<Integer> idsPuntoSuministroFiltro) {
-		NumberFormat formatter = NumberFormat.getNumberInstance(Locale.GERMANY);
+	private List<FilaControl> calcularFilas(Set<Integer> idsPuntoSuministroFiltro) {
+		List<FilaControl> filas = new ArrayList<>();
 		List<PuntoSuministroBean> listaPuntosSuministro = iGestorPuntoSuministro.consultarPuntosSuministro();
-		for(PuntoSuministroBean puntoSuministro:listaPuntosSuministro) {
+
+		for (PuntoSuministroBean puntoSuministro : listaPuntosSuministro) {
 			if (idsPuntoSuministroFiltro != null
 					&& !idsPuntoSuministroFiltro.isEmpty()
 					&& !idsPuntoSuministroFiltro.contains(puntoSuministro.getIdPuntoSuministro())) {
@@ -473,36 +543,22 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 			filtroNumerarBean.setIdPuntoSuministro(puntoSuministro.getIdPuntoSuministro());
 			filtroNumerarBean.setPuntoSuministro(puntoSuministro);
 
-			//Set de fechas: el día de ayer completo (00:00:00 a 23:59:59)
+			// Rango de fechas: el día de ayer completo (00:00:00 a 23:59:59)
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(new Date());
-
 			calendar.add(Calendar.DAY_OF_MONTH, -1);
 			calendar.set(Calendar.HOUR_OF_DAY, 0);
 			calendar.set(Calendar.MINUTE, 0);
 			calendar.set(Calendar.SECOND, 0);
 			calendar.set(Calendar.MILLISECOND, 0);
-
 			Date diaAnteriorInicio = calendar.getTime();
 			calendar.set(Calendar.HOUR_OF_DAY, 23);
 			calendar.set(Calendar.MINUTE, 59);
 			calendar.set(Calendar.SECOND, 59);
 			Date diaAnteriorFinal = calendar.getTime();
 
-			NumerarBean beanForm = new NumerarBean();
-			PuntoSuministroBean puntoSum = new PuntoSuministroBean();
-			puntoSum.setIdPuntoSuministro(filtroNumerarBean.getIdPuntoSuministro());
-			beanForm.setPuntoSuministro(puntoSum);
-
-			List<NumerarBean> listaNumerar = new ArrayList<>();
-			List<NumerarBean> listaNumerarDesc = new ArrayList<>();
-
-
-			// Si tenemos Punto de Suministro
 			filtroNumerarBean.setFechaInicioDesde(diaAnteriorInicio);
 			filtroNumerarBean.setFechaInicioHasta(diaAnteriorFinal);
-			beanForm.setFechaInicioDesde(filtroNumerarBean.getFechaInicioDesde());
-			beanForm.setFechaInicioHasta(filtroNumerarBean.getFechaInicioHasta());
 
 			puntoSuministro = iGestorPuntoSuministro.consultarDetallePuntoSuministro(puntoSuministro);
 
@@ -510,10 +566,10 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 			List<SurtidorBean> surtidores = iGestorSurtidor.consultarSurtidoresPuntoSuministro(puntoSuministro);
 			List<DescargaNodoConsolaBean> listaDescNodoCon = new ArrayList<>();
 			List<TanqueBean> tanques = iTanqueDAO.recuperarTanquesPuntoSuministro(puntoSuministro);
-			List<SuministroNodoCabezalBean> listaSuministroNodoCabezal = Collections.emptyList();
 			int sumLitros = 0;
 
-			for(SurtidorBean surt: surtidores) {
+			// --- Suministros por surtidor (movimientos de los cabezales) ---
+			for (SurtidorBean surt : surtidores) {
 				NumerarBean numerarBean = new NumerarBean();
 				numerarBean.setSurtidor(surt);
 
@@ -521,67 +577,61 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 				sumNodCab.setSurtidor(surt);
 				sumNodCab.setFechaInicioSuministro(filtroNumerarBean.getFechaInicioDesde());
 				sumNodCab.setFechaFinSuministro(filtroNumerarBean.getFechaInicioHasta());
-				listaSuministroNodoCabezal = iGestorSuministroNodoCabezal.consultarSuministrosNodoCabezal(sumNodCab);
+				List<SuministroNodoCabezalBean> listaSuministroNodoCabezal =
+						iGestorSuministroNodoCabezal.consultarSuministrosNodoCabezal(sumNodCab);
 				numerarBean = verificarListaSum(numerarBean, listaSuministroNodoCabezal);
 
-				Integer diferencia = numerarBean.getNumUltimoSuministro()-numerarBean.getNumPrimerSuministro();
+				Integer diferencia = numerarBean.getNumUltimoSuministro() - numerarBean.getNumPrimerSuministro();
 				diferencia = comprobarDif(diferencia);
 				numerarBean.setDiferencia(diferencia);
-				Integer faltan = numerarBean.getDiferencia() - numerarBean.getNumSuministros();
-				numerarBean.setFaltan(faltan);
+				numerarBean.setFaltan(numerarBean.getDiferencia() - numerarBean.getNumSuministros());
 				numerarBean = recorrerListaListro(listaSuministroNodoCabezal, numerarBean);
-				numerarBean.setDifLitros(numerarBean.getDifTotal()-numerarBean.getSumLitros());
+				numerarBean.setDifLitros(numerarBean.getDifTotal() - numerarBean.getSumLitros());
 
-				listaNumerar.add(numerarBean);
 				listaSuministroNodoCabezal = checkLitrosSaltos(listaSuministroNodoCabezal);
-				listaSumNodoCab.addAll(listaSuministroNodoCabezal);
-
+				listaSumNodoCab.addAll(listaSuministroNodoCabezal);   // para NumSUMCab
 				sumLitros += numerarBean.getSumLitros();
 			}
 
-			//Descargas y niveles por tanque
+			// --- Descargas y niveles por tanque ---
 			int volumenDescargadoTotal = 0;
 			int nt_f = 0;
 			int nt_i = 0;
 
-			NumerarBean numerarBeanEstados = new NumerarBean();
-			List<DescargaNodoConsolaBean> listaDescargaNodoConsola = Collections.emptyList();
-			
-			for(TanqueBean tanq : tanques){
+			for (TanqueBean tanq : tanques) {
 				NumerarBean numerarBeanTanques = new NumerarBean();
 				numerarBeanTanques.setTanque(tanq);
-				numerarBeanTanques.setTotalizadorDesc(numerarBeanEstados.getTotalizadorDesc());
 
 				DescargaNodoConsolaBean descNodCon = new DescargaNodoConsolaBean();
 				descNodCon.setFechaInicioDescarga(filtroNumerarBean.getFechaInicioDesde());
-				Date fechaHasta = filtroNumerarBean.getFechaInicioHasta();
 				Calendar c = Calendar.getInstance();
-				c.setTime(fechaHasta);
+				c.setTime(filtroNumerarBean.getFechaInicioHasta());
 				c.add(Calendar.DATE, 1);
-				c.add(Calendar.MINUTE,-1);
+				c.add(Calendar.MINUTE, -1);
 				descNodCon.setFechaFinDescarga(c.getTime());
 				descNodCon.setTanque(tanq);
 
-				// BBDD
-				listaDescargaNodoConsola = iGestorDescargaNodoConsola.recuperarDescargasEntreFechasTanque(descNodCon);
+				List<DescargaNodoConsolaBean> listaDescargaNodoConsola =
+						iGestorDescargaNodoConsola.recuperarDescargasEntreFechasTanque(descNodCon);
 				NivelTanqueBean nivelTanque = iGestorNivelTanque.ultimoNivelTanque(tanq.getIdTanque());
 				numerarBeanTanques.setUltimoNivelRegistrado(nivelTanque.getVolumenNeto().intValue());
 				numerarBeanTanques.setFechaRegistro(nivelTanque.getFechaNivelTanque());
-				// Nivel Final del tanque
+
 				List<TanqueBean> listTanque = new ArrayList<>();
 				listTanque.add(tanq);
-
 				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy");
 
 				// Nivel final del tanque (NT_F)
-				List<NivelTanqueBean> list_ntf = iGestorNivelTanque.consultarUltimoNivelTanques(filtroNumerarBean.getFechaInicioHasta(), listTanque);
+				List<NivelTanqueBean> list_ntf =
+						iGestorNivelTanque.consultarUltimoNivelTanques(filtroNumerarBean.getFechaInicioHasta(), listTanque);
 				numerarBeanTanques = obtenerUltimoNivelFecha(numerarBeanTanques, list_ntf);
 				numerarBeanTanques = compruebaSiExisteNivelFinal(filtroNumerarBean, numerarBeanTanques, sdf);
 				nt_f = getNt_f(nt_f, numerarBeanTanques);
 
-				// Nivel Inicial del tanque
-				List<NivelTanqueBean> list_nti = iGestorNivelTanque.consultarPrimerNivelTanques(filtroNumerarBean.getFechaInicioDesde(), listTanque);
-				for(NivelTanqueBean nti :list_nti){
+				// Nivel inicial del tanque (NT_I)
+				List<NivelTanqueBean> list_nti =
+						iGestorNivelTanque.consultarPrimerNivelTanques(filtroNumerarBean.getFechaInicioDesde(), listTanque);
+				for (NivelTanqueBean nti : list_nti) {
 					numerarBeanTanques.setPrimerNivelFecha(nti.getVolumenNeto().intValue());
 					numerarBeanTanques.setFechaRegPrimer(nti.getFechaNivelTanque());
 					numerarBeanTanques = compruebaSiExisteNivel(filtroNumerarBean, numerarBeanTanques, sdf);
@@ -591,193 +641,97 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 				numerarBeanTanques = volumenDesc(listaDescargaNodoConsola, numerarBeanTanques);
 				numerarBeanTanques = verificacionLista(numerarBeanTanques, listaDescargaNodoConsola);
 
-				volumenDescargadoTotal +=numerarBeanTanques.getVolumenDescargado();
-				listaNumerarDesc.add(numerarBeanTanques);
-				listaDescNodoCon.addAll(listaDescargaNodoConsola);
+				volumenDescargadoTotal += numerarBeanTanques.getVolumenDescargado();
+				listaDescNodoCon.addAll(listaDescargaNodoConsola);    // para NumDESCon
 			}
 
-			//Suministros y descargas ya procesados (tablas de la BBDD)
+			// --- Suministros y descargas procesados (tablas de la BBDD) ---
 			SuministroBean sum = new SuministroBean();
 			sum.setPuntoSuministro(puntoSuministro);
 			sum.setFechaInicio(filtroNumerarBean.getFechaInicioDesde());
 			sum.setFechaFin(filtroNumerarBean.getFechaInicioHasta());
 
-			// Lista de Suministros
 			List<SuministroBean> listaSum = iGestorSuministro.consultarSuministrosPuntoFechas(sum);
-			//Lista de Suministros del Nodo pendientes de procesar
-			List<SuministroNodoCabezalBean> listaSuministrosNodoNoProcesados = new ArrayList<>();
-			listaSuministrosNodoNoProcesados = iGestorSuministroNodoCabezal.consultarSuministrosNoProcesados(puntoSuministro);
-			Float litrosSuministroNodoNoProcesados = (float) 0;
-			litrosSuministroNodoNoProcesados = obtenerLitrosSuministroNodoNoProcesados(listaSuministrosNodoNoProcesados,litrosSuministroNodoNoProcesados,filtroNumerarBean.getFechaInicioDesde());
+			List<SuministroNodoCabezalBean> listaSuministrosNodoNoProcesados =
+					iGestorSuministroNodoCabezal.consultarSuministrosNoProcesados(puntoSuministro);
+			Float litrosSuministroNodoNoProcesados = obtenerLitrosSuministroNodoNoProcesados(
+					listaSuministrosNodoNoProcesados, 0f, filtroNumerarBean.getFechaInicioDesde());
 
-			// Lista de Descargas
 			List<DescargaBean> listaDes = iGestorDescarga.descargasPuntoFechas(sum);
-			DatosSumDesMovimientoBean datosSumDesMovimiento = recorrerListaSumDes(listaSum,listaDes);
-			//Lista de Descargas del Nodo pendientes de procesar
-			List<DescargaNodoConsolaBean> listaDescargasNodosNoProcesada  = new ArrayList<>();
-			listaDescargasNodosNoProcesada = iGestorDescargaNodoConsola.consultarListaDescargasNodoConsolaSinProcesar(puntoSuministro);
-
-			Double litrosDescargaNodoNoProcesados = (double) 0;
-			litrosDescargaNodoNoProcesados = obtenerLitrosDescargaNodoNoProcesados(listaDescargasNodosNoProcesada,litrosDescargaNodoNoProcesados,filtroNumerarBean.getFechaInicioDesde());
+			DatosSumDesMovimientoBean datosSumDesMovimiento = recorrerListaSumDes(listaSum, listaDes);
+			List<DescargaNodoConsolaBean> listaDescargasNodosNoProcesada =
+					iGestorDescargaNodoConsola.consultarListaDescargasNodoConsolaSinProcesar(puntoSuministro);
+			Double litrosDescargaNodoNoProcesados = obtenerLitrosDescargaNodoNoProcesados(
+					listaDescargasNodosNoProcesada, 0d, filtroNumerarBean.getFechaInicioDesde());
 
 			datosSumDesMovimiento.setTotalLitrosNodos(sumLitros);
-			datosSumDesMovimiento.setDifLitrosSum(datosSumDesMovimiento.getTotalLitrosSum()-sumLitros);
-
+			datosSumDesMovimiento.setDifLitrosSum(datosSumDesMovimiento.getTotalLitrosSum() - sumLitros);
 			datosSumDesMovimiento.setTotalLitrosDesNodos(volumenDescargadoTotal);
 			datosSumDesMovimiento.setDifLitrosDes(datosSumDesMovimiento.getTotalLitrosDes() - volumenDescargadoTotal);
 
-			// Diferencia de litros = (NT_I + TL_D + TL_D_PP - TL_S - TL_S_PP) - NT_F
+			// (NT_I + TL_D + TL_D_PP - TL_S - TL_S_PP) - NT_F
 			Integer excedenteLitros = (nt_i + datosSumDesMovimiento.getTotalLitrosDes()
 					+ litrosDescargaNodoNoProcesados.intValue()
 					- datosSumDesMovimiento.getTotalLitrosSum()
 					- litrosSuministroNodoNoProcesados.intValue()) - nt_f;
 
-			resultStringBuilder.append(OPEN_TR);
+			// --- Montamos la fila ---
+			FilaControl f = new FilaControl();
+			f.nombre = puntoSuministro.getNombre();
+			f.ntF = nt_f;
+			f.ntI = nt_i;
+			f.tlD = datosSumDesMovimiento.getTotalLitrosDes();
+			f.tlDPP = litrosDescargaNodoNoProcesados;
+			f.tlS = datosSumDesMovimiento.getTotalLitrosSum();
+			f.tlSPP = litrosSuministroNodoNoProcesados;
+			f.difLitros = -excedenteLitros;               // con signo, como el Excel
+			f.numSum = listaSum.size();
+			f.numSumCab = listaSumNodoCab.size();
+			f.numDes = listaDes.size();
+			f.numDesCon = listaDescNodoCon.size();
 
-			// Punto de Suministro
-			resultStringBuilder.append(OPEN_TD)
-					.append(" "+puntoSuministro.getNombre())
-					.append(CLOSE_TD);
+			Integer id = puntoSuministro.getIdPuntoSuministro();
+			f.totIni = iGestorSuministroNodoCabezal.obtenerTotalizadoresPorDia(diaAnteriorInicio, id);
+			f.totFin = iGestorSuministroNodoCabezal.obtenerTotalizadoresPorDia(new Date(), id);
+			f.etIni = iExistenciasTeoricasDAO.obtenerExistenciasTeoricas(puntoSuministro, diaAnteriorInicio);
+			f.etFin = iExistenciasTeoricasDAO.obtenerExistenciasTeoricas(puntoSuministro, diaAnteriorFinal);
 
-			// NT_F
-			resultStringBuilder.append(OPEN_TD_STYLE)
-					.append(formatter.format(nt_f))
-					.append(CLOSE_TD);
+			// --- Desde CUB: solo si sabemos la fecha de la CUB ---
+			Date fechaCub = obtenerFechaCub(puntoSuministro);
+			if (fechaCub != null) {
+				f.fechaCub = fechaCub;
 
-			// NT_I
-			resultStringBuilder.append(OPEN_TD_STYLE)
-					.append(formatter.format(nt_i))
-					.append(CLOSE_TD);
+				SuministroBean sumCub = new SuministroBean();
+				sumCub.setPuntoSuministro(puntoSuministro);
+				sumCub.setFechaInicio(fechaCub);
+				sumCub.setFechaFin(diaAnteriorFinal);
 
-			// TL_D
-			Double TL_D = Double.valueOf(datosSumDesMovimiento.getTotalLitrosDes());
-			resultStringBuilder.append(OPEN_TD_STYLE)
-					.append(formatter.format(TL_D))
-					.append(CLOSE_TD);
+				for (SuministroBean s : iGestorSuministro.consultarSuministrosPuntoFechas(sumCub)) {
+					f.tlSCub += s.getLitrosSuministrados15().doubleValue();
+				}
+				for (DescargaBean d : iGestorDescarga.descargasPuntoFechas(sumCub)) {
+					f.tlDCub += d.getLitrosDescargados().doubleValue();
+				}
+				f.tlSPPCub = litrosSumNoProcesadosEntre(listaSuministrosNodoNoProcesados, fechaCub, diaAnteriorFinal);
+				f.tlDPPCub = litrosDesNoProcesadosEntre(listaDescargasNodosNoProcesada, fechaCub, diaAnteriorFinal);
 
-			// TL_D_Por_Procesar
-			Double TL_D_Por_Procesar = litrosDescargaNodoNoProcesados;
-			resultStringBuilder.append(OPEN_TD_STYLE)
-					.append(formatter.format(TL_D_Por_Procesar))
-					.append(CLOSE_TD);
+				// NT_I de la CUB: nivel de cada tanque en la fecha de la CUB
+				for (TanqueBean tanq : tanques) {
+					List<TanqueBean> listTanque = new ArrayList<>();
+					listTanque.add(tanq);
+					int nivel = 0;
+					for (NivelTanqueBean nti : iGestorNivelTanque.consultarPrimerNivelTanques(fechaCub, listTanque)) {
+						nivel = nti.getVolumenNeto().intValue();
+					}
+					f.ntICub += nivel;
+				}
+				f.etIniCub = iExistenciasTeoricasDAO.obtenerExistenciasTeoricas(puntoSuministro, fechaCub);
+				f.difCub = nt_f - (f.ntICub + f.tlDCub + f.tlDPPCub - f.tlSCub - f.tlSPPCub);
+			}
 
-			// TL_S
-			Double TL_S = Double.valueOf(datosSumDesMovimiento.getTotalLitrosSum());
-			resultStringBuilder.append(OPEN_TD_STYLE)
-					.append(formatter.format(TL_S))
-					.append(CLOSE_TD);
-
-			// TL_S_Por_Procesar
-			Float TL_S_Por_Procesar = litrosSuministroNodoNoProcesados;
-			resultStringBuilder.append(OPEN_TD_STYLE)
-					.append(formatter.format(TL_S_Por_Procesar))
-					.append(CLOSE_TD);
-
-			// Diferencia de litros
-			resultStringBuilder.append(OPEN_TD_STYLE)
-					.append(formatter.format(Math.abs(excedenteLitros)))
-					.append(CLOSE_TD);
-
-			// NUEVAS COLUMNAS
-			// NumSUM
-			resultStringBuilder.append(OPEN_TD)
-					.append(listaSum.size())
-					.append(CLOSE_TD);
-
-			// NumSUMMov
-			resultStringBuilder.append(OPEN_TD)
-					.append(listaSumNodoCab.size())
-					.append(CLOSE_TD);
-
-			// NumDES
-			resultStringBuilder.append(OPEN_TD)
-					.append(listaDes.size())
-					.append(CLOSE_TD);
-
-			// NumDESMov
-			resultStringBuilder.append(OPEN_TD)
-					.append(listaDescNodoCon.size())
-					.append(CLOSE_TD);
-
-			// TOT litros SUM a CGD
-			Double litrosSumCGD = iGestorSuministro.obtenerTotLitrosSumCGD(puntoSuministro.getIdPuntoSuministro(), true);
-			resultStringBuilder.append(OPEN_TD)
-					.append(formatter.format(litrosSumCGD))
-					.append(CLOSE_TD);
-
-			// TOT litros SUM no CGD
-			Double litrosSumNoCGD = iGestorSuministro.obtenerTotLitrosSumCGD(puntoSuministro.getIdPuntoSuministro(), false);
-			resultStringBuilder.append(OPEN_TD)
-					.append(formatter.format(litrosSumNoCGD))
-					.append(CLOSE_TD);
-
-			// TOT litros DES a CGD
-			Double litrosDesCGD = iGestorDescarga.obtenerTotLitrosDesCGD(puntoSuministro.getIdPuntoSuministro(), true);
-			resultStringBuilder.append(OPEN_TD)
-					.append(formatter.format(litrosDesCGD))
-					.append(CLOSE_TD);
-
-			// TOT litros DES no CGD
-			Double litrosDesNoCGD = iGestorDescarga.obtenerTotLitrosDesCGD(puntoSuministro.getIdPuntoSuministro(), false);
-			resultStringBuilder.append(OPEN_TD)
-					.append(formatter.format(litrosDesNoCGD))
-					.append(CLOSE_TD);
-
-			// TOT Ini
-			Double totIni = iGestorSuministroNodoCabezal.obtenerTotalizadoresPorDia(diaAnteriorInicio, puntoSuministro.getIdPuntoSuministro());
-			resultStringBuilder.append(OPEN_TD)
-					.append(formatter.format(totIni))
-					.append(CLOSE_TD);
-
-			// TOT Fin
-			Double totFin = iGestorSuministroNodoCabezal.obtenerTotalizadoresPorDia(new Date(), puntoSuministro.getIdPuntoSuministro());
-			resultStringBuilder.append(OPEN_TD)
-					.append(formatter.format(totFin))
-					.append(CLOSE_TD);
-
-			// Dif TOT
-			Double difTOT = totFin-totIni;
-			resultStringBuilder.append(OPEN_TD_STYLE)
-					.append(formatter.format(difTOT))
-					.append(CLOSE_TD);
-
-			// ET Ini
-			Double etIni = iExistenciasTeoricasDAO.obtenerExistenciasTeoricas(puntoSuministro, diaAnteriorInicio);
-			resultStringBuilder.append(OPEN_TD)
-					.append(formatter.format(etIni))
-					.append(CLOSE_TD);
-
-			// ET Fin
-			Double etFin = iExistenciasTeoricasDAO.obtenerExistenciasTeoricas(puntoSuministro, diaAnteriorFinal);
-			resultStringBuilder.append(OPEN_TD)
-					.append(formatter.format(etFin))
-					.append(CLOSE_TD);
-
-			// Dif ET
-			Double difET = etFin-etIni;
-			resultStringBuilder.append(OPEN_TD_STYLE)
-					.append(formatter.format(difET))
-					.append(CLOSE_TD);
-
-			// Dif TOT vs SUM
-			resultStringBuilder.append(OPEN_TD_STYLE)
-					.append(formatter.format(difTOT - TL_S))
-					.append(CLOSE_TD);
-
-			// de litros TOT: NT_F – ( NT_I + TL_D + TL_D_Por_Procesar - Dif. TOT)
-			resultStringBuilder.append(OPEN_TD_STYLE)
-					.append(formatter.format(nt_f - (nt_i + TL_D + TL_D_Por_Procesar - difTOT)))
-					.append(CLOSE_TD);
-
-			// Merma
-			resultStringBuilder.append(OPEN_TD)
-					.append(formatter.format(nt_f - etFin))
-					.append(CLOSE_TD);
-
-			resultStringBuilder.append(CLOSE_TR);
+			filas.add(f);
 		}
-
-		resultStringBuilder.append(CLOSE_TABLE);
+		return filas;
 	}
 
 	/**
@@ -902,6 +856,78 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 
 	/* ===================== MÉTODOS AUXILIARES ===================== */
 
+	private NumberFormat formatoNumero() {
+    	return NumberFormat.getNumberInstance(Locale.GERMANY);
+	}
+
+	private NumberFormat formatoPorcentaje() {
+		NumberFormat pct = NumberFormat.getPercentInstance(Locale.GERMANY);
+		pct.setMinimumFractionDigits(2);
+		pct.setMaximumFractionDigits(2);
+		return pct;
+	}
+
+	// Abre un <td> con borde, alineación y color de fondo opcional
+	private String celda(boolean derecha, String color) {
+		StringBuilder sb = new StringBuilder("<td style=\"border: 1px solid black ;");
+		if (derecha) {
+			sb.append(" text-align: right;");
+		}
+		if (color != null && !color.isEmpty()) {
+			sb.append(" background-color: ").append(color).append(";");
+		}
+		return sb.append("\">").toString();
+	}
+
+	// Una fila: primera columna a la izquierda, el resto a la derecha. color null = sin color
+	private void fila(StringBuilder sb, String color, String... valores) {
+		sb.append(OPEN_TR);
+		for (int i = 0; i < valores.length; i++) {
+			sb.append(celda(i != 0, color)).append(valores[i]).append(CLOSE_TD);
+		}
+		sb.append(CLOSE_TR);
+	}
+
+	private void cerrarTabla(StringBuilder sb) {
+		sb.append(CLOSE_TABLE).append(ETIQUETA_BR);
+	}
+
+	private boolean hayCub(List<FilaControl> filas) {
+		for (FilaControl f : filas) {
+			if (f.fechaCub != null) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	// TODO: devolver la fecha de la última CUB del punto. Mientras devuelva null no salen las tablas CUB.
+	private Date obtenerFechaCub(PuntoSuministroBean punto) {
+		return null;
+	}
+
+	private double litrosSumNoProcesadosEntre(List<SuministroNodoCabezalBean> lista, Date desde, Date hasta) {
+		double total = 0;
+		for (SuministroNodoCabezalBean s : lista) {
+			Date fin = s.getFechaFinSuministro();
+			if (fin != null && !fin.before(desde) && !fin.after(hasta)) {
+				total += s.getLitrosTemp15();
+			}
+		}
+		return total;
+	}
+
+	private double litrosDesNoProcesadosEntre(List<DescargaNodoConsolaBean> lista, Date desde, Date hasta) {
+		double total = 0;
+		for (DescargaNodoConsolaBean d : lista) {
+			Date fin = d.getFechaFinDescarga();
+			if (fin != null && !fin.before(desde) && !fin.after(hasta)) {
+				total += (d.getVolumenNetoFin() - d.getVolumenNetoInicio());
+			}
+		}
+		return total;
+	}
+
 	private void procesarGrupo(List<SuministroBean> grupo,
 							   List<SuministroBean> resultado,
 							   DecimalFormat formatter) {
@@ -965,7 +991,6 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 
 		return copia;
 	}
-
 
 	private Map<String, List<SuministroBean>> agruparPorPuntoSuministro(List<SuministroBean> lista){
 		Map<String, List<SuministroBean>> grupos = new HashMap<String, List<SuministroBean>>();
