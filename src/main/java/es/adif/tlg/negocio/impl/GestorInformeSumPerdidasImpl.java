@@ -325,7 +325,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	private void cabeceraTablaTotalizadores(StringBuilder resultStringBuilder) {
 
 		resultStringBuilder.append(
-				creacionTabla("Totalizadores", "NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
+				creacionTabla("de los litos suministrados vs totalizadores", "NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
 
 		Map<String, String> columnas = new LinkedHashMap<>();
 
@@ -349,7 +349,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	 */
 	private void cabeceraTablaLitrosMovidos(StringBuilder resultStringBuilder) {
 
-		resultStringBuilder.append(creacionTabla("Litros Registrados",
+		resultStringBuilder.append(creacionTabla("de litros Registrados",
 				"NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
 
 		Map<String, String> columnas = new LinkedHashMap<>();
@@ -379,7 +379,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 
 	private void cabeceraTablaLitrosMovidosCUB(StringBuilder resultStringBuilder) {
 
-		resultStringBuilder.append(creacionTabla("Litros registrados desde CUB",
+		resultStringBuilder.append(creacionTabla("de litros registrados desde CUB",
 				"NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
 
 		Map<String, String> columnas = new LinkedHashMap<>();
@@ -465,7 +465,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 			if (Math.abs(difVsSum) > 3) {
 				difVsSumTexto = rojo(difVsSumTexto);
 				puntoSuministroText = rojo(puntoSuministroText);
-				difTotText = rojo(puntoSuministroText);
+				difTotText = rojo(difTotText);
 			}
 
 			fila(sb, null, puntoSuministroText, nf.format(f.tlS), nf.format(f.tlSPP), nf.format(sumTlS),
@@ -551,7 +551,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 			String mermasExceso = nf.format(mermas);
 			String avgTexto = pct.format(avg);
 
-			//TODO: POR DEFINIR EL AVG 
+			//TODO: POR DEFINIR CUANDO PONCE TENGA REUNION CON LOLO
 			if (avg > 0.01) {
 				puntoSuministro = rojo(puntoSuministro);
 				mermasExceso = rojo(mermasExceso);
@@ -570,19 +570,34 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	 */
 	private void cuerpoTablaMermasExcesosCUB(StringBuilder sb, List<FilaControl> filas) {
 		NumberFormat nf = formatoNumero();
+		NumberFormat pct = formatoPorcentaje();
 		for (FilaControl f : filas) {
 			if (f.fechaCub == null) {
 				continue;
 			}
-			String color = null;
+			double difLitros = f.ntF - f.ntICub;
+			double difEt = f.etFin - f.etIniCub;
+			double mermas = difLitros - difEt;
+			double avg = ratio(mermas, f.tlSCub + f.tlSPPCub);
 
-			fila(sb, color, f.nombre, nf.format(f.ntF), nf.format(f.ntICub), nf.format(f.ntF - f.ntICub),
-					nf.format(f.etFin), nf.format(f.etIniCub), nf.format(f.etFin - f.etIniCub),
-					nf.format(f.ntF - f.etFin));
+			String puntoSuministro = f.nombre;
+			String mermasExceso = nf.format(mermas);
+			String avgTexto = pct.format(avg);
+
+			// regla: AVG > 5 %
+			if (avg > 0.05) {
+				puntoSuministro = rojo(puntoSuministro);
+				mermasExceso = rojo(mermasExceso);
+				avgTexto = rojo(avgTexto);
+			}
+
+			fila(sb, null, puntoSuministro, nf.format(f.ntF), nf.format(f.ntICub), nf.format(difLitros),
+					nf.format(f.etFin), nf.format(f.etIniCub), nf.format(difEt),
+					mermasExceso, avgTexto);
 		}
 		cerrarTabla(sb);
 	}
-
+	
 	private List<FilaControl> calcularFilas(Set<Integer> idsPuntoSuministroFiltro) {
 		List<FilaControl> filas = new ArrayList<>();
 		List<PuntoSuministroBean> listaPuntosSuministro = iGestorPuntoSuministro.consultarPuntosSuministro();
@@ -937,8 +952,6 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 		return sb.append("\">").toString();
 	}
 
-	// Una fila: primera columna a la izquierda, el resto a la derecha. color null =
-	// sin color
 	private void fila(StringBuilder sb, String color, String... valores) {
 		sb.append(OPEN_TR);
 		for (int i = 0; i < valores.length; i++) {

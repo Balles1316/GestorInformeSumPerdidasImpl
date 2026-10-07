@@ -41,11 +41,11 @@ public class GestorInformeSumPerdidasImplTest {
         Files.write(salida, sb.toString().getBytes(StandardCharsets.UTF_8));
 
         String html = sb.toString();
-        assertTrue(html.contains("Comprobación diaria Totalizadores:"));
-        assertTrue(html.contains("Comprobación diaria Litros Registrados:"));
-        assertTrue(html.contains("Comprobación diaria Litros registrados desde CUB:"));
-        assertTrue(html.contains("Comprobación diaria Mermas o Excesos:"));
-        assertTrue(html.contains("Comprobación diaria Mermas o Excesos desde CUB:"));
+        assertTrue(html.contains("Comprobación diaria de los litos suministrados vs totalizadores:"));
+        assertTrue(html.contains("Comprobación diaria de litros Registrados:"));
+        assertTrue(html.contains("Comprobación diaria de litros registrados desde CUB:"));
+        assertTrue(html.contains("Comprobación diaria de mermas o Excesos:"));
+        assertTrue(html.contains("Comprobación diaria de mermas o Excesos desde CUB:"));
         assertTrue(html.contains("color:red"));   // hay algún valor en rojo
         }
 
