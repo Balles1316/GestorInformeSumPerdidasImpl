@@ -41,7 +41,7 @@ public class GestorInformeSumPerdidasImplTest {
         Files.write(salida, sb.toString().getBytes(StandardCharsets.UTF_8));
 
         String html = sb.toString();
-        assertTrue(html.contains("Comprobación diaria de los litos suministrados vs totalizadores:"));
+        assertTrue(html.contains("Comprobación diaria de los litros suministrados vs totalizadores:"));
         assertTrue(html.contains("Comprobación diaria de litros Registrados:"));
         assertTrue(html.contains("Comprobación diaria de litros registrados desde CUB:"));
         assertTrue(html.contains("Comprobación diaria de mermas o Excesos:"));

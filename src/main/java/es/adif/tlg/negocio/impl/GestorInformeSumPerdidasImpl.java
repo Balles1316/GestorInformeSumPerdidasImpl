@@ -325,7 +325,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	private void cabeceraTablaTotalizadores(StringBuilder resultStringBuilder) {
 
 		resultStringBuilder.append(
-				creacionTabla("de los litos suministrados vs totalizadores", "NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
+				creacionTabla("de los litros suministrados vs totalizadores", "NT_F = NT_I + TL_D + TL_D_Por_Procesar - TL_S - TL_S_Por_Procesar"));
 
 		Map<String, String> columnas = new LinkedHashMap<>();
 
@@ -404,7 +404,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	 */
 	private void cabeceraTablaMermasExcesos(StringBuilder resultStringBuilder) {
 
-		resultStringBuilder.append(creacionTabla("Mermas o Excesos",
+		resultStringBuilder.append(creacionTabla("de mermas o Excesos",
 				"NT_F - NT_I = Dif litros | ET Fin -  ET Ini = Dif ET | Dif litros - Dif ET = Mermas o Excesos "));
 		crearCabeceras(resultStringBuilder, cabecerasMermas());
 
@@ -415,7 +415,7 @@ public class GestorInformeSumPerdidasImpl implements IGestorInformeSumPerdidas {
 	 */
 	private void cabeceraTablaMermasExcesosCUB(StringBuilder resultStringBuilder) {
 
-		resultStringBuilder.append(creacionTabla("Mermas o Excesos desde CUB", ""));
+		resultStringBuilder.append(creacionTabla("de mermas o Excesos desde CUB", ""));
 		crearCabeceras(resultStringBuilder, cabecerasMermas());
 
 	}
